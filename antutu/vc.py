@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import time
+from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
