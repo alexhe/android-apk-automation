@@ -20,8 +20,8 @@ vc.dump(window='-1')
 mflops_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call(['lava-test-case', '"Linpack MFLOPS Single Score"', '--result pass', '--measurement', mflops_single_score.getText(), '--units MFLOPS'])
-call(['lava-test-case', '"Linpack Time Single Score"', '--result pass', '--measurement', time_single_score.getText(), '--units seconds'])
+call(['lava-test-case', '"Linpack MFLOPS Single Score"', '--result', 'pass', '--measurement', mflops_single_score.getText(), '--units', 'MFLOPS'])
+call(['lava-test-case', '"Linpack Time Single Score"', '--result', 'pass', '--measurement', time_single_score.getText(), '--units', 'seconds'])
 
 start_multi_button = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/btncalculate")
 start_multi_button.touch()
@@ -30,5 +30,5 @@ vc.dump(window='-1')
 mflops_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call(['lava-test-case', '"Linpack MFLOPS Multi Score"', '--result pass', '--measurement', mflops_multi_score.getText(), '--units MFLOPS'])
-call(['lava-test-case', '"Linpack Time Multi Score"', '--result pass', '--measurement', time_multi_score.getText(), '--units seconds'])
+call(['lava-test-case', '"Linpack MFLOPS Multi Score"', '--result', 'pass', '--measurement', mflops_multi_score.getText(), '--units', 'MFLOPS'])
+call(['lava-test-case', '"Linpack Time Multi Score"', '--result', 'pass', '--measurement', time_multi_score.getText(), '--units', 'seconds'])

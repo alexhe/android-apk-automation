@@ -34,9 +34,9 @@ integer_score = vc.findViewByIdOrRaise("com.drolez.nbench:id/TextView02v")
 floating_score = vc.findViewByIdOrRaise("com.drolez.nbench:id/TextView03v")
 results = vc.findViewByIdOrRaise("com.drolez.nbench:id/editor")
 
-call(['lava-test-case', '"Nbench memory score"', '--result pass', '--measurement', memory_score.getText()])
-call(['lava-test-case', '"Nbench integer score"', '--result pass', '--measurement', integer_score.getText()])
-call(['lava-test-case', '"Nbench floating point score"', '--result pass', '--measurement', floating_score.getText()])
+call(['lava-test-case', 'Nbench memory score', '--result', 'pass', '--measurement', memory_score.getText()])
+call(['lava-test-case', 'Nbench integer score', '--result', 'pass', '--measurement', integer_score.getText()])
+call(['lava-test-case', 'Nbench floating point score', '--result', 'pass', '--measurement', floating_score.getText()])
 test_ids = ['NUMERIC SORT',
             'STRING SORT',
             'BITFIELD',
@@ -51,4 +51,4 @@ test_ids = ['NUMERIC SORT',
 results_re = re.compile("^(?P<test_case_id>[A-Z\s]+)\s+:\s+(?P<measurement>[\d\.e\+]+)", re.MULTILINE)
 for result in results_re.finditer(results.getText()):
     if result.group('test_case_id').strip() in test_ids:
-        call(['lava-test-case', result.group('test_case_id').strip(), '--result pass', '--measurement', result.group('measurement'), '--units Iterations/sec'])
+        call(['lava-test-case', result.group('test_case_id').strip(), '--result', 'pass', '--measurement', result.group('measurement'), '--units', 'Iterations/sec'])

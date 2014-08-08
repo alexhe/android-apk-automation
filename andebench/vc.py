@@ -57,4 +57,4 @@ results_text = results.getText()
 result_re = re.compile("^(?P<test_case_id>[a-zA-Z\s]+):\s(?P<measurement>\d+)", re.MULTILINE)
 search_results = result_re.finditer(results_text)
 for result in search_results:
-    call(['lava-test-case', result.group('test_case_id'), '--result pass', '--measurement', result.group('measurement'), '--units Iterations/sec'])
+    call(['lava-test-case', result.group('test_case_id'), '--result', 'pass', '--measurement', result.group('measurement'), '--units', 'Iterations/sec'])

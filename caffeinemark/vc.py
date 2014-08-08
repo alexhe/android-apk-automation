@@ -7,8 +7,7 @@ from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
 def collect_score(score_name, score_widget):
-    #call(['lava-test-case', score_name, '--result pass', '--measurement', score_widget.getText()])
-    print ['lava-test-case', score_name, '--result pass', '--measurement', score_widget.getText()]
+    call(['lava-test-case', score_name, '--result', 'pass', '--measurement', score_widget.getText()])
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
@@ -23,12 +22,14 @@ start_button.touch()
 finished = False
 while (not finished):
     time.sleep(1)
-    vc.dump(window='-1')
     try:
+        vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.flexycore.caffeinemark:id/testResultsCellOneTitle")
         finished = True
     except ViewNotFoundException:
         pass
+    except RuntimeError as e:
+        print e
 print "benchmark finished"
 
 total_score = vc.findViewByIdOrRaise("com.flexycore.caffeinemark:id/testResultEntryOverAllScore")
