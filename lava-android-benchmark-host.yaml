@@ -20,6 +20,7 @@ install:
         - python setup.py install
     deps:
         - python-pil
+        - python-setuptools
 
 params:
     TEST_NAME: "geekbench"
