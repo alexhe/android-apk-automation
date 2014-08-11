@@ -6,7 +6,7 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
-kwargs1 = {'verbose': False, 'ignoresecuredevice': False, 'serialno': '192.168.1.128:5555'}
+kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
 vc = ViewClient(device, serialno, **kwargs2)
@@ -43,19 +43,24 @@ finished = False
 while(not finished):
     time.sleep(1)
     vc.dump(window='-1')
-    try:
-        vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/layoutScoresHeader")
+    if vc.findViewById("com.antutu.ABenchMark:id/layoutScoresHeader"):
         finished = True
-    except ViewNotFoundException:
-        pass
+
 print "benchmark finished"
+
+# close unnecessary windows if they appear
+for index in range(0, 3):
+    time.sleep(1)
+    vc.dump(window='-1')
+    if vc.findViewById("com.antutu.ABenchMark:id/num_1"):
+        break
+    else:
+        device.press('KEYCODE_BACK')
 
 time.sleep(2)
 vc.dump(window='-1')
 header = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/layoutScoresHeader")
-try:
-    vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/layoutScores")
-except ViewNotFoundException:
+if not vc.findViewById("com.antutu.ABenchMark:id/layoutScores"):
     header.touch()
 
 time.sleep(2)
@@ -69,20 +74,11 @@ db_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_db")
 sd_write_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdw")
 sd_read_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdr")
 
-#call(['lava-test-case', '"AnTuTu 2.8.2 CPU Integer Score"', '--result pass', '--measurement', cpu_int_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 CPU Float Score"', '--result pass', '--measurement', cpu_float_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 2D Score"', '--result pass', '--measurement', twod_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 3D Score"', '--result pass', '--measurement', threed_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 Mem Score"', '--result pass', '--measurement', mem_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 DB Score"', '--result pass', '--measurement', db_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 SD Write Score"', '--result pass', '--measurement', sd_write_score.getText()])
-#call(['lava-test-case', '"AnTuTu 2.8.2 SD Read Score"', '--result pass', '--measurement', sd_write_score.getText()])
-#
-print ['lava-test-case', '"AnTuTu 2.8.2 CPU Integer Score"', '--result pass', '--measurement', cpu_int_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 CPU Float Score"', '--result pass', '--measurement', cpu_float_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 2D Score"', '--result pass', '--measurement', twod_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 3D Score"', '--result pass', '--measurement', threed_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 Mem Score"', '--result pass', '--measurement', mem_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 DB Score"', '--result pass', '--measurement', db_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 SD Write Score"', '--result pass', '--measurement', sd_write_score.getText()]
-print ['lava-test-case', '"AnTuTu 2.8.2 SD Read Score"', '--result pass', '--measurement', sd_write_score.getText()]
+call(['lava-test-case', '"AnTuTu 2.8.2 CPU Integer Score"', '--result', 'pass', '--measurement', cpu_int_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 CPU Float Score"', '--result', 'pass', '--measurement', cpu_float_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 2D Score"', '--result', 'pass', '--measurement', twod_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 3D Score"', '--result', 'pass', '--measurement', threed_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 Mem Score"', '--result', 'pass', '--measurement', mem_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 DB Score"', '--result', 'pass', '--measurement', db_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 SD Write Score"', '--result', 'pass', '--measurement', sd_write_score.getText()])
+call(['lava-test-case', '"AnTuTu 2.8.2 SD Read Score"', '--result', 'pass', '--measurement', sd_write_score.getText()])
