@@ -6,6 +6,7 @@ png_dir_device="/data/local/tmp/"
 post_install=""
 pre_uninstall=""
 do_streamline=false
+ret_value=0
 
 #function install_linaro_android_jar(){
 #    jar_name="linaro.android.jar"
@@ -183,6 +184,7 @@ function install_run_uninstall(){
     streamline_init_capture
     if [ -n "${test_method}" ]; then
         ${test_method}
+        ret_value=$?
     fi
     sleep 5
     streamline_end_capture
@@ -322,4 +324,5 @@ function main(){
     pull_png_files_from_device "${png_dir_device}" ${parent_dir}
     collect_log
     cleanup
+    return ${ret_value}
 }
