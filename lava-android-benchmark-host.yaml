@@ -36,7 +36,7 @@ run:
         - adb connect $IPADDR
         - adb wait-for-device
         - cd android-apk-automation/$TEST_NAME
-        - for (( LOOP=1; LOOP<=$ITERATIONS; B++ )); do lava-test-case $TEST_NAME-execution-$LOOP --shell ./execute.sh $IPADDR:5555; done;
+        - for (( LOOP=1; LOOP<=$ITERATIONS; LOOP++ )); do lava-test-case $TEST_NAME-execution-$LOOP --shell ./execute.sh $IPADDR:5555; done;
         - lava-test-run-attach logcat_canvas.log text/plain
         - lava-test-run-attach logcat.log text/plain
         - lava-test-run-attach logcat_textview.log text/plain
