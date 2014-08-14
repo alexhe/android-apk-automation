@@ -37,7 +37,7 @@ logfile.close()
 
 print result_collector
 if len(result_collector) > 0:
-    average_fps = sum(int(element) for element in result_collector) / len(result_collector)
+    average_fps = sum(float(element) for element in result_collector) / len(result_collector)
     score_number = average_fps
     run_result = "pass"
     score_unit = flagwordB
