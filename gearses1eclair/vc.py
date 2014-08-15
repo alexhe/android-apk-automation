@@ -5,7 +5,7 @@ import time
 from subprocess import call
 
 def collect_score(benchmark_name, run_result, score_number, score_unit):
-    call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', score_number, '--units', score_unit])
+    call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
 
 benchmark_name = "GearsES1eclair"
 time.sleep(60)
