@@ -7,6 +7,7 @@ post_install=""
 pre_uninstall=""
 do_streamline=false
 ret_value=0
+timeout=10m
 
 #function install_linaro_android_jar(){
 #    jar_name="linaro.android.jar"
@@ -183,7 +184,7 @@ function install_run_uninstall(){
     sleep 5
     streamline_init_capture
     if [ -n "${test_method}" ]; then
-        ${test_method}
+        timeout ${timeout} ${test_method}
         ret_value=$?
     fi
     sleep 5
