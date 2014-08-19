@@ -8,12 +8,6 @@ from HTMLParser import HTMLParser
                     
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
-#def collect_score(score_name, score_widget):
-    #print ['lava-test-case', score_name, '--result pass', '--measurement', score_widget.getText()]
-
-#parent_dir = os.path.realpath(os.path.dirname(__file__))
-#res_path = os.path.join(parent_dir, 'latest_result.html')
-
 def extract_scores(filename):
     list_of_scores = []
 
@@ -62,11 +56,13 @@ vc.dump('-1')
 btn_setup_2 = vc.findViewByIdOrRaise("android:id/button2")
 btn_setup_2.touch()
 vc.dump('-1')
+time.sleep(5)
 
 #Start Button
-btn_start_on = vc.findViewByIdOrRaise("android:id/title")
+btn_start_on = vc.findViewWithTextOrRaise("Start")
 btn_start_on.touch()
 vc.dump('-1')
+time.sleep(2)
 
 #Enable Tutorial button
 btn_setup_3 = vc.findViewByIdOrRaise("android:id/button2")
@@ -75,13 +71,12 @@ btn_setup_3.touch()
 #Wait while Vellamo is running benchmark
 finished = False
 while (not finished):
-    time.sleep(35)
+    time.sleep(50)
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.quicinc.vellamo:id/score_view")
         finished = True 
     except ViewNotFoundException:
-        #finished = True
         pass
     except RuntimeError as e:
         print e
