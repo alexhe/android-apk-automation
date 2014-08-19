@@ -41,14 +41,14 @@ function pull_png_files_from_device(){
 }
 
 function init(){
-
-    #install_linaro_android_jar
-
-    #uninstall the apk application
-    echo "trying to unistall ${apk_package}"
-    adb uninstall "${apk_package}"
-    echo "unistalled ${apk_package}"
-    #clear the logcat information
+    # uninstall the apk application
+    # don't uninstall if apk file name is empty
+    if [ ! -z "$apk_file_name" ]; then
+        echo "trying to unistall ${apk_package}"
+        adb uninstall "${apk_package}"
+        echo "unistalled ${apk_package}"
+    fi
+    # clear the logcat information
     adb logcat -c
     sleep 5
 
@@ -169,11 +169,18 @@ function get_file_with_base_url(){
 
 function install_run_uninstall(){
     #install the apk files
-    apk_file="${APKS_DIR}/${apk_file_name}"
-    adb install "${apk_file}"
-    if [ $? -ne 0 ]; then
-        echo "Failed to install ${apk_file}."
-        exit 1
+    if [ ! -z "$apk_file_name" ]; then
+        apk_file="${APKS_DIR}/${apk_file_name}"
+        adb install "${apk_file}"
+        if [ $? -ne 0 ]; then
+            echo "Failed to install ${apk_file}."
+            exit 1
+        fi
+    else
+        # force stop activity if apk is already installed
+        echo "stopping ${apk_package}"
+        adb shell am force-stop "${apk_package}"
+        sleep 5
     fi
     if [ -n "${post_install}" ]; then
         ${post_install}
@@ -192,7 +199,15 @@ function install_run_uninstall(){
     if [ -n "${pre_uninstall}" ]; then
         ${pre_uninstall}
     fi
-    adb uninstall "${apk_package}"
+
+    if [ ! -z "$apk_file_name" ]; then
+        adb uninstall "${apk_package}"
+    else
+        # force stop activity if apk is a stock app
+        echo "stopping ${apk_package}"
+        adb shell am force-stop "${apk_package}"
+        sleep 5
+    fi
 }
 
 function collect_log(){
@@ -319,7 +334,9 @@ function main(){
     echo "exports done"
     init
     echo "init done"
-    get_file_with_base_url "${apk_file_name}"
+    if [ ! -z "$apk_file_name" ]; then
+        get_file_with_base_url "${apk_file_name}"
+    fi
     install_run_uninstall
     echo "testing done"
     pull_png_files_from_device "${png_dir_device}" ${parent_dir}
