@@ -11,8 +11,8 @@ def get_score_with_content_desc(vc, content_desc, offset=1):
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    print "Text :", score.getText()
-
+    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getText())
+  
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
@@ -39,7 +39,7 @@ vc.dump(window='-1')
 #Wait for download to finish
 finished = False
 while (not finished):
-    time.sleep(1)
+    time.sleep(50)
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("android:id/content")
@@ -56,7 +56,7 @@ test.touch()
 #Wait while benchmark is running
 finished = False
 while (not finished):
-    time.sleep(1)
+    time.sleep(50)
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.glbenchmark.glbenchmark27:id/cell_result_maincolumn")
