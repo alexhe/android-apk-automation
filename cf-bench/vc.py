@@ -12,7 +12,12 @@ def get_score_with_content_desc(vc, content_desc, offset=1):
         score_uid = score_view.getUniqueId()
         uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
         score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-        call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getText()])
+        score_text = score.getText()
+        if score_text.find("%") > 0:
+            score_value, units = score_text.split(" ")
+            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_value, "--units", units])
+        else:
+            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_text])
     except ViewNotFoundException:
         print "%s not found" % (content_desc)
         pass
