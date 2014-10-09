@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <int name="lastVersionCode" value="3322" />
+    <string name="test_sdcard_path">/mnt/sdcard</string>
+    <boolean name="frist_start" value="false" />
+    <boolean name="setting_update" value="false" />
+</map>
