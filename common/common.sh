@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#base_url="ssh://linaro-lava@linaro-private.git.linaro.org/srv/linaro-private.git.linaro.org/qa/benchmark-apks.git"
-base_url="http://people.linaro.org/~milosz.wasilewski/apks/"
+base_url="http://testdata.validation.linaro.org/apks/"
 png_dir_device="/data/local/tmp/"
 post_install=""
 pre_uninstall=""
