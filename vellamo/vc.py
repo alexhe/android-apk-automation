@@ -56,13 +56,13 @@ vc.dump('-1')
 btn_setup_2 = vc.findViewByIdOrRaise("android:id/button2")
 btn_setup_2.touch()
 vc.dump('-1')
-time.sleep(5)
+time.sleep(10)
 
 #Start Button
 btn_start_on = vc.findViewWithTextOrRaise("Start")
 btn_start_on.touch()
 vc.dump('-1')
-time.sleep(2)
+time.sleep(5)
 
 #Enable Tutorial button
 btn_setup_3 = vc.findViewByIdOrRaise("android:id/button2")
@@ -71,7 +71,7 @@ btn_setup_3.touch()
 #Wait while Vellamo is running benchmark
 finished = False
 while (not finished):
-    time.sleep(50)
+    time.sleep(1)
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.quicinc.vellamo:id/score_view")
