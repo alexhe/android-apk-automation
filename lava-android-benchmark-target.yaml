@@ -1,24 +1,22 @@
 metadata:
     name: lava-android-benchmark-target
     format: "Lava-Test-Shell Test Definition 1.0"
-    description: "Wrapper around lava-android-test. This is the target part.
-                  It sends the IP address of the target to host and than
-                  waits for the host to execute tests."
+    description: "Multinode target part for android benchmarking"
     maintainer:
         - milosz.wasilewski@linaro.org
     os:
         - android
     scope:
-        - functional
+        - benchmark
     devices:
         - panda
         - panda-es
         - vexpress-a9
         - vexpress-tc2
-        - wg
+        - juno
 
 params:
-    TEST_NAME: "busybox"
+    TEST_NAME: "geekbench"
 
 run:
     steps:
