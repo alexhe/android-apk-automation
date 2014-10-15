@@ -323,7 +323,7 @@ function parse_arguments(){
 }
 
 function main(){
-    echo ${test_timeout}
+    echo "test timeout: ${timeout}"
     arg_serial=""
     parse_arguments "$@"
     echo "parsing done"
