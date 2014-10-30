@@ -42,9 +42,12 @@ button_start_test.touch()
 finished = False
 while(not finished):
     time.sleep(1)
-    vc.dump(window='-1')
-    if vc.findViewById("com.antutu.ABenchMark:id/layoutScoresHeader"):
-        finished = True
+    try:
+        vc.dump(window='-1')
+        if vc.findViewById("com.antutu.ABenchMark:id/layoutScoresHeader"):
+            finished = True
+    except RuntimeError as e:
+        print e
 
 print "benchmark finished"
 
