@@ -16,7 +16,7 @@ install:
         - http://git.linaro.org/git/qa/android-apk-automation.git
         - https://github.com/dtmilano/AndroidViewClient.git
     steps:
-        - cd AndroidViewClient/AndroidViewClient
+        - cd AndroidViewClient/
         - python setup.py install
     deps:
         - python-pil
