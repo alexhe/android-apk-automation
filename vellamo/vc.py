@@ -5,7 +5,6 @@ import time
 from subprocess import call
 from HTMLParser import HTMLParser
 
-                    
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
 def extract_scores(filename):
@@ -56,7 +55,30 @@ vc.dump('-1')
 btn_setup_2 = vc.findViewByIdOrRaise("android:id/button2")
 btn_setup_2.touch()
 vc.dump('-1')
-time.sleep(10)
+time.sleep(1)
+
+#Discard low battery level dialog
+btn_battery_3 = vc.findViewByIdOrRaise("android:id/button3")
+btn_battery_3.touch()
+vc.dump('-1')
+time.sleep(1)
+
+#Discard no network connection
+btn_network_3 = vc.findViewByIdOrRaise("android:id/button3")
+btn_network_3.touch()
+vc.dump('-1')
+time.sleep(1)
+
+#Disable safeguards
+btn_more = vc.findViewWithTextOrRaise("More")
+btn_more.touch()
+vc.dump('-1')
+time.sleep(1)
+
+btn_safeguards = vc.findViewWithTextOrRaise("Override Safeguards")
+btn_safeguards.touch()
+vc.dump('-1')
+time.sleep(1)
 
 #Start Button
 btn_start_on = vc.findViewWithTextOrRaise("Start")
@@ -64,7 +86,7 @@ btn_start_on.touch()
 vc.dump('-1')
 time.sleep(5)
 
-#Enable Tutorial button
+#Discard Enable Tutorial dialog
 btn_setup_3 = vc.findViewByIdOrRaise("android:id/button2")
 btn_setup_3.touch()
 
@@ -75,7 +97,7 @@ while (not finished):
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.quicinc.vellamo:id/score_view")
-        finished = True 
+        finished = True
     except ViewNotFoundException:
         pass
     except RuntimeError as e:
