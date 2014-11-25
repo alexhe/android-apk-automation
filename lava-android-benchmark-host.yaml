@@ -17,12 +17,19 @@ install:
         - https://github.com/dtmilano/AndroidViewClient.git
     steps:
         - cd AndroidViewClient/
+        - git checkout $AVC_VERSION
+        - cd AndroidViewClient/
         - python setup.py install
     deps:
+        - git
         - python-pil
         - python-setuptools
 
 params:
+    # this corresponds to version 0.7.6 of AVC
+    # this is a good known version
+    # later versions sometimes fail to press buttons on the UI
+    AVC_VERSION: "7fc8b7f8c618ec4a2cca67f46d43b40f4cf02ed5"
     TEST_NAME: "geekbench"
     ITERATIONS: 1
 
