@@ -4,45 +4,59 @@ import os
 import time
 from subprocess import call
 from HTMLParser import HTMLParser
+from xml.etree import ElementTree
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+class AllEntities:
+    def __getitem__(self, key):
+        #key is your entity, you can do whatever you want with it here
+        return ""
+
 def extract_scores(filename):
-    list_of_scores = []
 
-    with open(filename,'r') as infile:
-        html = infile.read()
-        tree = lxml.html.fromstring(html)
+    testf = open(filename, 'r')
 
-        # Get the Total Score
-        h2s_with_span_selector = CSSSelector('div h2 span')
-        h2s_with_span = h2s_with_span_selector(tree)
-        total_score = h2s_with_span[0].text # pick the string within the span inside the h2
-        total_score = int(total_score) # convert to integer
-        list_of_scores.append(('Total Score', total_score))
+    parser = ElementTree.XMLParser()
+    parser.parser.UseForeignDTD(True)
+    parser.entity = AllEntities()
 
-        # Get list of DIVs
-        div_in_div_selector = CSSSelector('div div') 
-        score_divs = div_in_div_selector(tree) # this returns all divs inside the main div (handled above)
-        for div in score_divs:
-            #print div.xpath('string()')
-            # there's another div inside this div, which has the title
-            try:
-                title = CSSSelector('div div')(div)[0].xpath('string()') # get all text inside that div
-                title = title.encode('UTF-8') # Since some bits contain unicode characters, encode it so 'print' doesn't choke 
-                all_li = CSSSelector('div ul li')(div) # List out all LIs inside the div->ul
-                if all_li: # Ignore if empty
-                    score = re.findall("\d+.\d+", all_li[-1].text)[0] # Find the float (decimal(dot)decimal) inside last text in last LI (-1)
+    tree = ElementTree.parse(testf, parser=parser)
 
-                list_of_scores.append((title, score)) # Append to the list of scores
-            except IndexError:
-                pass # ignore any errors where list index is out of bounds (we don't want those elements)
+    # search for h2 header
+    totalscore = -1
+    for node in tree.iter('h2'):
+        if node.text.startswith("Total Score"):
+            totalscore = node.getchildren()[0].text
 
-    return list_of_scores # finally, return the list
+    benchmarks = []
+    for node in tree.iter('div'):
+        isscorenode = False
+        if node.find("./img") is not None:
+            isscorenode = True
+        if isscorenode:
+            scorename = node.find("./div").text.strip()
+            benchmark_dict = {'name': scorename, 'values': {}}
 
-kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
+            for subscore in node.findall(".//li"):
+                 key, value = subscore.text.split(":")
+                 benchmark_dict['values'].update({key: value.strip()})
+            benchmarks.append(benchmark_dict)
+
+    call(['lava-test-case', "Vellamo 1.0.6", '--result', 'pass', '--measurement', totalscore])
+    for benchmark in benchmarks:
+        name = benchmark['name']
+        result = 'pass'
+        if 'failed' in benchmark['values'].keys():
+            result = 'fail'
+        for subbenchkey, subbenchvalue in benchmark['values'].items():
+            if subbenchkey != 'failed':
+                call(['lava-test-case', "%s %s" % (name, subbenchkey), '--result', result, '--measurement', subbenchvalue])
+
+kwargs1 = {'verbose': True, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+
 vc = ViewClient(device, serialno, **kwargs2)
 vc.dump('-1')
 
@@ -51,7 +65,7 @@ btn_setup_1 = vc.findViewByIdOrRaise("android:id/button1")
 btn_setup_1.touch()
 vc.dump('-1')
 
-#Edit list of websites button 
+#Edit list of websites button
 btn_setup_2 = vc.findViewByIdOrRaise("android:id/button2")
 btn_setup_2.touch()
 vc.dump('-1')
@@ -106,9 +120,7 @@ while (not finished):
 print "Benchmark finished"
 
 return_value = call(['./adb_pull.sh'])
-if (return_value == 0): 
-    scores = extract_scores(filename='latest_result.html')
-    for score in scores:
-        call(['lava-test-case', score[0], '--result', 'pass', '--measurement', score[1]])  
+if (return_value == 0):
+    extract_scores(filename='latest_result.html')
 else:
     sys.exit(1)
