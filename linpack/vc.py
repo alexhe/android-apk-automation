@@ -17,6 +17,12 @@ start_single_button = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/btn
 start_single_button.touch()
 time.sleep(2)
 vc.dump(window='-1')
+start_single_button = vc.findViewById("com.greenecomputing.linpack:id/btnsingle")
+while not start_single_button:
+    time.sleep(2)
+    vc.dump(window='-1')
+    start_single_button = vc.findViewById("com.greenecomputing.linpack:id/btnsingle")
+
 mflops_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
@@ -27,6 +33,12 @@ start_multi_button = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/btnc
 start_multi_button.touch()
 time.sleep(2)
 vc.dump(window='-1')
+start_single_button = vc.findViewById("com.greenecomputing.linpack:id/btnsingle")
+while not start_single_button:
+    time.sleep(2)
+    vc.dump(window='-1')
+    start_single_button = vc.findViewById("com.greenecomputing.linpack:id/btnsingle")
+
 mflops_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
