@@ -78,10 +78,14 @@ vc.dump('-1')
 time.sleep(1)
 
 #Discard no network connection
-btn_network_3 = vc.findViewByIdOrRaise("android:id/button3")
-btn_network_3.touch()
-vc.dump('-1')
-time.sleep(1)
+try:
+    btn_network_3 = vc.findViewByIdOrRaise("android:id/button3")
+    btn_network_3.touch()
+    vc.dump('-1')
+    time.sleep(1)
+except ViewNotFoundException:
+    # doesn't show up on all boards
+    pass
 
 #Disable safeguards
 btn_more = vc.findViewWithTextOrRaise("More")
