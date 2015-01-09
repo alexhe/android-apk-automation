@@ -60,19 +60,15 @@ twod_graphics_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/gpu_2d_te
 threed_graphics_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/gpu_3d_text")
 storage_io_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/io_sdw_text")
 database_io_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/io_db_text")
+default_unit = 'Inapplicable'
 
-
-call(['lava-test-case', '"AnTuTu 4.0.3 UX Multitask Score"', '--result', 'pass', '--measurement', multitask_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 UX Dalvik Score"', '--result', 'pass', '--measurement', dalvik_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 CPU Integer Score"', '--result', 'pass', '--measurement', cpu_integer_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 CPU Float-Point Score"', '--result', 'pass', '--measurement', cpu_float_point_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 RAM Operation Score"', '--result', 'pass', '--measurement', ram_operation_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 RAM Speed Score"', '--result', 'pass', '--measurement', ram_speed_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 GPU 2D Graphics Score"', '--result', 'pass', '--measurement', twod_graphics_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 GPU 3D Graphics Score"', '--result', 'pass', '--measurement', threed_graphics_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 IO Storage I/O Score"', '--result', 'pass', '--measurement', storage_io_score.getText()])
-call(['lava-test-case', '"AnTuTu 4.0.3 IO Database I/O Score"', '--result', 'pass', '--measurement', database_io_score.getText()])
-
-
-
-
+call(['lava-test-case', '"AnTuTu 4.0.3 UX Multitask Score"', '--result', 'pass', '--measurement', multitask_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 UX Dalvik Score"', '--result', 'pass', '--measurement', dalvik_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 CPU Integer Score"', '--result', 'pass', '--measurement', cpu_integer_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 CPU Float-Point Score"', '--result', 'pass', '--measurement', cpu_float_point_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 RAM Operation Score"', '--result', 'pass', '--measurement', ram_operation_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 RAM Speed Score"', '--result', 'pass', '--measurement', ram_speed_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 GPU 2D Graphics Score"', '--result', 'pass', '--measurement', twod_graphics_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 GPU 3D Graphics Score"', '--result', 'pass', '--measurement', threed_graphics_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 IO Storage I/O Score"', '--result', 'pass', '--measurement', storage_io_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 4.0.3 IO Database I/O Score"', '--result', 'pass', '--measurement', database_io_score.getText(), '--units', default_unit])
