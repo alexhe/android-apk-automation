@@ -13,6 +13,7 @@ class AllEntities:
         #key is your entity, you can do whatever you want with it here
         return ""
 
+default_unit = 'points'
 def extract_scores(filename):
 
     testf = open(filename, 'r')
@@ -43,7 +44,7 @@ def extract_scores(filename):
                  benchmark_dict['values'].update({key: value.strip()})
             benchmarks.append(benchmark_dict)
 
-    call(['lava-test-case', "Vellamo 1.0.6", '--result', 'pass', '--measurement', totalscore])
+    call(['lava-test-case', "Vellamo 1.0.6", '--result', 'pass', '--measurement', totalscore, '--units', default_unit])
     for benchmark in benchmarks:
         name = benchmark['name']
         result = 'pass'
@@ -51,7 +52,7 @@ def extract_scores(filename):
             result = 'fail'
         for subbenchkey, subbenchvalue in benchmark['values'].items():
             if subbenchkey != 'failed':
-                call(['lava-test-case', "%s %s" % (name, subbenchkey), '--result', result, '--measurement', subbenchvalue])
+                call(['lava-test-case', "%s %s" % (name, subbenchkey), '--result', result, '--measurement', subbenchvalue, '--units', default_unit])
 
 kwargs1 = {'verbose': True, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
