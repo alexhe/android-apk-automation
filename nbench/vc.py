@@ -3,8 +3,9 @@ import sys
 import os
 import time
 from subprocess import call
-
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
+
+default_unit = 'points'
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
@@ -17,8 +18,6 @@ start_button = vc.findViewByIdOrRaise("com.drolez.nbench:id/start")
 start_button.touch()
 
 # benchmark runs for 10 minutes
-#time.sleep(600)
-
 finished = False
 while (not finished):
     time.sleep(1)
@@ -34,9 +33,10 @@ integer_score = vc.findViewByIdOrRaise("com.drolez.nbench:id/TextView02v")
 floating_score = vc.findViewByIdOrRaise("com.drolez.nbench:id/TextView03v")
 results = vc.findViewByIdOrRaise("com.drolez.nbench:id/editor")
 
-call(['lava-test-case', 'Nbench memory score', '--result', 'pass', '--measurement', memory_score.getText()])
-call(['lava-test-case', 'Nbench integer score', '--result', 'pass', '--measurement', integer_score.getText()])
-call(['lava-test-case', 'Nbench floating point score', '--result', 'pass', '--measurement', floating_score.getText()])
+call(['lava-test-case', 'Nbench memory score', '--result', 'pass', '--measurement', memory_score.getText(), '--units', default_unit])
+call(['lava-test-case', 'Nbench integer score', '--result', 'pass', '--measurement', integer_score.getText(), '--units', default_unit])
+call(['lava-test-case', 'Nbench floating point score', '--result', 'pass', '--measurement', floating_score.getText(), '--units', default_unit])
+
 test_ids = ['NUMERIC SORT',
             'STRING SORT',
             'BITFIELD',
