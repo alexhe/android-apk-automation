@@ -6,12 +6,13 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+default_unit = 'points'
 def get_score_with_content_desc(vc, content_desc, offset=1):
     score_view = vc.findViewWithContentDescriptionOrRaise(content_desc)
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getContentDescription()])
+    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getContentDescription(), '--units', default_unit])
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
