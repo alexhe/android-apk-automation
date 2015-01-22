@@ -6,8 +6,15 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
-def collect_score(score_name, score_widget):
-    call(['lava-test-case', score_name, '--result', 'pass', '--measurement', score_widget.getText()])
+# Result collection for LAVA
+debug_switcher = False
+default_unit = 'points'
+result = 'pass'
+def collect_score(score_name, result, score, default_unit):
+    if debug_switcher == False:
+        call(['lava-test-case', score_name, '--result', result, '--measurement', score, '--unit', default_unit])
+    else:
+        print ['lava-test-case', score_name, '--result', result, '--measurement', score, '--unit', default_unit]
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
@@ -32,8 +39,8 @@ while (not finished):
         print e
 print "benchmark finished"
 
-total_score = vc.findViewByIdOrRaise("com.flexycore.caffeinemark:id/testResultEntryOverAllScore")
-collect_score("Caffeinemark score", total_score)
+total_score = vc.findViewByIdOrRaise("com.flexycore.caffeinemark:id/testResultEntryOverAllScore").getText()
+collect_score("Caffeinemark-score", result, total_score, default_unit)
 
 details_button = vc.findViewByIdOrRaise("com.flexycore.caffeinemark:id/testResultsDetailsButton")
 details_button.touch()
@@ -42,25 +49,25 @@ time.sleep(2)
 vc.dump(window='-1')
 
 sieve_name = vc.findViewByIdOrRaise("id/no_id/9").getText()
-sieve_score = vc.findViewByIdOrRaise("id/no_id/10")
-collect_score("Caffeinemark Sieve score", sieve_score)
+sieve_score = vc.findViewByIdOrRaise("id/no_id/10").getText()
+collect_score("Caffeinemark-Sieve-score", result, sieve_score, default_unit)
 
 loop_name = vc.findViewByIdOrRaise("id/no_id/13").getText()
-loop_score = vc.findViewByIdOrRaise("id/no_id/14")
-collect_score("Caffeinemark Loop score", loop_score)
+loop_score = vc.findViewByIdOrRaise("id/no_id/14").getText()
+collect_score("Caffeinemark-Loop-score", result, loop_score, default_unit)
 
 logic_name = vc.findViewByIdOrRaise("id/no_id/17").getText()
-logic_score = vc.findViewByIdOrRaise("id/no_id/18")
-collect_score("Caffeinemark Collect score", logic_score)
+logic_score = vc.findViewByIdOrRaise("id/no_id/18").getText()
+collect_score("Caffeinemark-Collect-score", result, logic_score, default_unit)
 
 string_name = vc.findViewByIdOrRaise("id/no_id/21").getText()
-string_score = vc.findViewByIdOrRaise("id/no_id/22")
-collect_score("Caffeinemark String score", string_score)
+string_score = vc.findViewByIdOrRaise("id/no_id/22").getText()
+collect_score("Caffeinemark-String-score", result, string_score, default_unit)
 
 float_name = vc.findViewByIdOrRaise("id/no_id/25").getText()
-float_score = vc.findViewByIdOrRaise("id/no_id/26")
-collect_score("Caffeinemark Float score", float_score)
+float_score = vc.findViewByIdOrRaise("id/no_id/26").getText()
+collect_score("Caffeinemark-Float-score", result, float_score, default_unit)
 
 method_name = vc.findViewByIdOrRaise("id/no_id/29").getText()
-method_score = vc.findViewByIdOrRaise("id/no_id/30")
-collect_score("Caffeinemark Method score", method_score)
+method_score = vc.findViewByIdOrRaise("id/no_id/30").getText()
+collect_score("Caffeinemark-Method-score", result, method_score, default_unit)
