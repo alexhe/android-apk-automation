@@ -6,6 +6,7 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+default_unit = 'points'
 def get_score_with_content_desc(vc, content_desc, offset=1):
     try:
         score_view = vc.findViewWithTextOrRaise(content_desc)
@@ -15,9 +16,9 @@ def get_score_with_content_desc(vc, content_desc, offset=1):
         score_text = score.getText()
         if score_text.find("%") > 0:
             score_value, units = score_text.split(" ")
-            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_value, "--units", units])
+            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_value, '--units', units])
         else:
-            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_text])
+            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_text, '--units', default_unit])
     except ViewNotFoundException:
         print "%s not found" % (content_desc)
         pass
