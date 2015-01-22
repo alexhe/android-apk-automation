@@ -6,12 +6,13 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+default_unit = 'points'
 def get_score_with_text(vc, text, offset=1):
     score_view = vc.findViewWithTextOrRaise(text)
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    call(['lava-test-case', text.strip(), '--result', 'pass', '--measurement', score.getText().strip()])
+    call(['lava-test-case', text.strip(), '--result', 'pass', '--measurement', score.getText().strip(), '--units', default_unit])
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
@@ -45,4 +46,3 @@ get_score_with_text(vc, "Select 15000 Statements ")
 get_score_with_text(vc, "Delete 200 Statments ")
 get_score_with_text(vc, "Delete 15000 Statments in Transaction ")
 get_score_with_text(vc, "Overall Avg QPS ")
-
