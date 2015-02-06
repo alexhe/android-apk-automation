@@ -12,11 +12,11 @@ def get_score_with_content_desc(vc, content_desc, offset=1):
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getText(), '--units', default_unit)
+    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getText(), '--units', default_unit])
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
-kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
 time.sleep(2)
 vc.dump(window='-1')
@@ -35,7 +35,6 @@ vc.dump(window='-1')
 # Accept Data Sync and Download content
 btn_accept_1 = vc.findViewByIdOrRaise("android:id/button1")
 btn_accept_1.touch()
-vc.dump(window='-1')
 
 # Wait for download to finish
 finished = False

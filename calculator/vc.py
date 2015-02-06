@@ -13,7 +13,8 @@ def collect_score(testcase, run_result):
     call(['lava-test-case', testcase, '--result', run_result])
 
 device, serialno = ViewClient.connectToDeviceOrExit()
-vc = ViewClient(device, serialno)
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
+vc = ViewClient(device, serialno, **kwargs2)
 
 for i in range(0, 10):
     try:

@@ -49,13 +49,23 @@ def extract_scores(filename):
             print 'Cannot find ' + result_flag + ' or ' + chapter_flag + ' in test result dictionary. Please check it manually.'
     fileopen.close()
 
+def vc_dump(vc):
+    for i in range(0, 3):
+        try:
+            vc.dump('-1')
+            return
+        except ValueError as e:
+            print e
+            time.sleep(1)
+
 def choose_chapter(vc, chapter_name):
     # ToDo: scroll screen if chapter is not found on the first screen
-    vc.dump('-1')
+    time.sleep(1)
+    vc_dump(vc)
     chapter_tab = vc.findViewWithText(chapter_name)
     if chapter_tab is None:
         device.drag((300, 500), (300, 100), 1000, 20, 0)
-        vc.dump('-1')
+        vc_dump(vc)
         chapter_tab = vc.findViewWithTextOrRaise(chapter_name)
     enclosing_tab = chapter_tab.getParent().getParent()
     for child in enclosing_tab.children:
@@ -66,23 +76,23 @@ def choose_chapter(vc, chapter_name):
 
 kwargs1 = {'verbose': True, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
-kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 
 vc = ViewClient(device, serialno, **kwargs2)
-vc.dump('-1')
+vc_dump(vc)
 
 # Accept Vellamo EULA
 btn_setup_1 = vc.findViewByIdOrRaise("android:id/button1")
 btn_setup_1.touch()
-vc.dump('-1')
+vc_dump(vc)
 
 # open settings
-vc.dump('-1')
+vc_dump(vc)
 btn_settings = vc.findViewByIdOrRaise('com.quicinc.vellamo:id/main_toolbar_wheel')
 btn_settings.touch()
 
 # disable animations
-vc.dump('-1')
+vc_dump(vc)
 btn_animations = vc.findViewWithTextOrRaise(u'Make Vellamo even more beautiful')
 btn_animations.touch()
 
@@ -94,7 +104,7 @@ for chapter in chapters:
     choose_chapter(vc, chapter)
 
     # Start benchmark
-    vc.dump('-1')
+    vc_dump(vc)
     btn_start = vc.findViewByIdOrRaise("com.quicinc.vellamo:id/main_toolbar_operation_button")
     btn_start.touch()
 
@@ -112,6 +122,8 @@ for chapter in chapters:
             pass
         except RuntimeError as e:
             print e
+        except  ValueError as ve:
+            print ve
 
     print "Benchmark finished: %s" % chapter
     device.press("KEYCODE_BACK")

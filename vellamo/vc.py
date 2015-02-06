@@ -56,7 +56,7 @@ def extract_scores(filename):
 
 kwargs1 = {'verbose': True, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
-kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 
 vc = ViewClient(device, serialno, **kwargs2)
 vc.dump('-1')

@@ -23,7 +23,8 @@ def collect_score(testcase, run_result):
 
 device, serialno = ViewClient.connectToDeviceOrExit()
 
-vc = ViewClient(device, serialno)
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
+vc = ViewClient(device, serialno, **kwargs2)
 
 # Title check
 try:

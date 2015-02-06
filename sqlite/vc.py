@@ -16,7 +16,7 @@ def get_score_with_text(vc, text, offset=1):
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
-kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
 vc.dump('-1')
 btn_start = vc.findViewByIdOrRaise("com.wtsang02.sqliteutil.activities:id/btStart")

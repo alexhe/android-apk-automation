@@ -8,7 +8,7 @@ from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
-kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True}
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
 time.sleep(5)
 vc.dump(window='-1')
@@ -48,7 +48,8 @@ while(not finished):
             finished = True
     except RuntimeError as e:
         print e
-
+    except ValueError as ve:
+        print ve
 print "benchmark finished"
 
 # close unnecessary windows if they appear

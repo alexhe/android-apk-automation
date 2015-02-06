@@ -41,7 +41,8 @@ def logparser(cached_result_file):
 
 cached_result_file = "last_results_2.5.1.xml"
 device, serialno = ViewClient.connectToDeviceOrExit()
-vc = ViewClient(device, serialno)
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
+vc = ViewClient(device, serialno, **kwargs2)
 time.sleep(2)
 
 vc.dump(window='-1')

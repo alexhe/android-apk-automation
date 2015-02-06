@@ -32,7 +32,8 @@ testcase_singlecore = "geekbench_single_core"
 testcase_multicore = "geekbench_multi_core"
 
 device, serialno = ViewClient.connectToDeviceOrExit()
-vc = ViewClient(device, serialno)
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
+vc = ViewClient(device, serialno, **kwargs2)
 
 try:
     trigger = vc.findViewByIdOrRaise(package_name + ":id/runBenchmarks")

@@ -14,7 +14,8 @@ def collect_score(testcase, run_result):
 
 device, serialno = ViewClient.connectToDeviceOrExit()
 
-vc = ViewClient(device, serialno)
+kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
+vc = ViewClient(device, serialno, **kwargs2)
 
 try:
     return_word = vc.findViewByIdOrRaise("com.android.browser:id/title").getText()
