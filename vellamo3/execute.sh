@@ -10,4 +10,5 @@ apk_package="com.quicinc.vellamo"
 # following should no need to modify
 parent_dir=`dirname ${0}`
 source "${parent_dir}/../common/common.sh"
+timeout=30m
 main "$@"

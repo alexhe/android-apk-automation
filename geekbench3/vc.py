@@ -5,6 +5,8 @@ import time
 from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+curdir = os.path.realpath(os.path.dirname(__file__))
+
 def collect_score(testcase, run_result):
     call(['lava-test-case', testcase, '--result', run_result])
 
@@ -36,6 +38,8 @@ kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': Fal
 vc = ViewClient(device, serialno, **kwargs2)
 
 try:
+    time.sleep(2)
+    vc.dump()
     trigger = vc.findViewByIdOrRaise(package_name + ":id/runBenchmarks")
     trigger.touch()
     print "Geekbench 3 Test Started!"
@@ -82,7 +86,7 @@ else:
     sys.exit(1)
 
 # Get and parse the result file
-call(['./get_result.sh'])
+call(['%s/get_result.sh' % curdir ])
 if os.path.exists(raw_output_file) == True:
     logfile = open(raw_output_file, "r")
     for line in logfile:

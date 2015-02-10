@@ -2,6 +2,8 @@
 # Author: Botao Sun <botao.sun@linaro.org>
 # Transfer obb and pre-config file from host to target device
 
+local_this_parent="$(cd $(dirname $0);pwd)"
+
 obb_basic_path="/storage/sdcard0/Android"
 config_basic_path="/data/data/com.glbenchmark.glbenchmark25"
 errorword="No such"
@@ -56,5 +58,5 @@ function push_config(){
     fi
 }
 
-push_obb "main.1.com.glbenchmark.glbenchmark25.obb" "$obb_basic_path/obb/com.glbenchmark.glbenchmark25/main.1.com.glbenchmark.glbenchmark25.obb"
-push_config "com.glbenchmark.glbenchmark25_preferences.xml" "$config_basic_path/shared_prefs/com.glbenchmark.glbenchmark25_preferences.xml"
+push_obb "${local_this_parent}/main.1.com.glbenchmark.glbenchmark25.obb" "$obb_basic_path/obb/com.glbenchmark.glbenchmark25/main.1.com.glbenchmark.glbenchmark25.obb"
+push_config "${local_this_parent}/com.glbenchmark.glbenchmark25_preferences.xml" "$config_basic_path/shared_prefs/com.glbenchmark.glbenchmark25_preferences.xml"

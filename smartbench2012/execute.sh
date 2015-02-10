@@ -9,5 +9,5 @@ apk_package="com.smartbench.twelve"
 #following should no need to modify
 parent_dir=`dirname ${0}`
 source "${parent_dir}/../common/common.sh"
-pre_uninstall="${parent_dir}/extract_results.sh"
+post_uninstall="${parent_dir}/extract_results.sh"
 main "$@"

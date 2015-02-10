@@ -8,6 +8,9 @@ from xml.etree import ElementTree
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+
+
 class AllEntities:
     def __getitem__(self, key):
         #key is your entity, you can do whatever you want with it here
@@ -72,11 +75,15 @@ btn_setup_2.touch()
 vc.dump('-1')
 time.sleep(1)
 
-#Discard low battery level dialog
-btn_battery_3 = vc.findViewByIdOrRaise("android:id/button3")
-btn_battery_3.touch()
-vc.dump('-1')
-time.sleep(1)
+try:
+    #Discard low battery level dialog
+    btn_battery_3 = vc.findViewByIdOrRaise("android:id/button3")
+    btn_battery_3.touch()
+    vc.dump('-1')
+    time.sleep(1)
+except ViewNotFoundException:
+    # doesn't show up on all boards
+    pass
 
 #Discard no network connection
 try:
@@ -112,7 +119,7 @@ btn_setup_3.touch()
 #Wait while Vellamo is running benchmark
 finished = False
 while (not finished):
-    time.sleep(1)
+    time.sleep(30)
     try:
         vc.dump(window='-1')
         vc.findViewByIdOrRaise("com.quicinc.vellamo:id/score_view")
@@ -121,10 +128,13 @@ while (not finished):
         pass
     except RuntimeError as e:
         print e
+        pass
+    except ValueError:
+        pass
 
 print "Benchmark finished"
 
-return_value = call(['./adb_pull.sh'])
+return_value = call(['%s/adb_pull.sh' % parent_dir])
 if (return_value == 0):
     extract_scores(filename='latest_result.html')
 else:

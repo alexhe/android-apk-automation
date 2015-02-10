@@ -18,9 +18,16 @@ kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
-vc.dump('-1')
-btn_start = vc.findViewWithTextOrRaise("Run SmartBench")
-btn_start.touch()
+while True:
+    try:
+        vc.dump('-1')
+        btn_start = vc.findViewWithTextOrRaise("Run SmartBench")
+        btn_start.touch()
+        break
+    except RuntimeError:
+        pass
+    except ValueError:
+        pass
 
 finished = False
 btn_results = None
@@ -32,6 +39,8 @@ while(not finished):
         if btn_results:
             finished = True
     except RuntimeError:
+        pass
+    except ValueError:
         pass
 print "benchmark finished"
 btn_results.touch()

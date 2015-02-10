@@ -1,11 +1,14 @@
 # Author: Botao Sun <botao.sun@linaro.org>
 
+import os
 import sys
 import time
 import re
 import xml.dom.minidom
 from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient
+
+curdir = os.path.realpath(os.path.dirname(__file__))
 
 def collect_score(benchmark_name, run_result, score_number, score_unit):
     call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
@@ -64,21 +67,15 @@ time.sleep(3)
 
 # Disable crashed test suites
 vc.dump(window='-1')
-if len(sys.argv) > 3:
-    print "Parameter Invalid!\nUsage: python vc.py <serialno> <disabled_test_suite>.\nTo run all test simply use python vc.py without any parameter or just with <serialno>.\nIt currently only supports to disable 1 test suite, more flexbility may will be added in future."
-    sys.exit(1)
-elif len(sys.argv) == 3:
-    print "Test suite " + sys.argv[2] + " is going to be disabled!"
-    crashed_test_name = sys.argv[2]
-    crashed_test = vc.findViewWithText(crashed_test_name)
-    if crashed_test != None:
-        crashed_test.touch()
-        print "Test suite " + crashed_test_name + " has been excluded!"
-        time.sleep(2)
-    else:
-        print "Can not find test suite " + crashed_test_name + ", please check the screen!"
-elif len(sys.argv) == 2 or len(sys.argv) == 1:
-    pass
+crashed_test_name = "C24Z24MS4"
+print "Test suite " + crashed_test_name + " is going to be disabled!"
+crashed_test = vc.findViewWithText(crashed_test_name)
+if crashed_test != None:
+    crashed_test.touch()
+    print "Test suite " + crashed_test_name + " has been excluded!"
+    time.sleep(2)
+else:
+    print "Can not find test suite " + crashed_test_name + ", please check the screen!"
 
 # Start selected test suites
 start_button = vc.findViewByIdOrRaise("com.glbenchmark.glbenchmark25:id/buttonStart")
@@ -103,5 +100,5 @@ while (not finished):
     else:
         print "GLBenchmark Test is still in progress..."
 
-call_return = call(['./get_result.sh'])
+call_return = call(['%s/get_result.sh' % curdir])
 logparser(cached_result_file)

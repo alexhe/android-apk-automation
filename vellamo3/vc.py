@@ -2,12 +2,14 @@
 # Author:
 # Milosz Wasilewski <milosz.wasilewski@linaro.org>
 # Botao Sun <botao.sun@linaro.org>
-
+import os
 import sys
 import time
 import json
 from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
+
+parent_dir = os.path.realpath(os.path.dirname(__file__))
 
 # Result collection for LAVA
 debug_switcher = False
@@ -129,7 +131,7 @@ for chapter in chapters:
     device.press("KEYCODE_BACK")
     device.press("KEYCODE_BACK")
 
-return_value = call(['./get_result.sh'])
+return_value = call(['%s/get_result.sh' % parent_dir])
 if return_value == 0:
     extract_scores(filename='chapterscores.json')
 else:

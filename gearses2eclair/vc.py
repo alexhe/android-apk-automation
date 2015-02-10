@@ -1,8 +1,12 @@
 # Author: Botao Sun <botao.sun@linaro.org>
 
+import os
 import sys
 import time
 from subprocess import call
+
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+
 
 def collect_score(benchmark_name, run_result, score_number, score_unit):
     call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
@@ -10,7 +14,7 @@ def collect_score(benchmark_name, run_result, score_number, score_unit):
 benchmark_name = "GearsES2eclair"
 time.sleep(60)
 
-call_return = call(['./get_raw_logcat.sh'])
+call_return = call(['%s/get_raw_logcat.sh' % parent_dir])
 if call_return != 0:
     print "Capture real time logcat output failed!"
     sys.exit(1)
