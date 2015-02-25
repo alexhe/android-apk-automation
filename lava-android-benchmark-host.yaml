@@ -13,7 +13,6 @@ metadata:
 
 install:
     git-repos:
-        - http://git.linaro.org/git/qa/android-apk-automation.git
         - https://github.com/mwasilew/AndroidViewClient.git
     steps:
         - cd AndroidViewClient/
@@ -36,11 +35,9 @@ run:
         - lava-wait $TEST_NAME-send-ip
         - IPADDR=`awk -F '=' '{print $2}' /tmp/lava_multi_node_cache.txt`
         - adb connect $IPADDR
-        - adb root
-        - adb devices
-        - adb remount
         - adb wait-for-device
-        - cd android-apk-automation/$TEST_NAME
+        - adb shell id
+        - cd $TEST_NAME
         - for (( LOOP=1; LOOP<=$ITERATIONS; LOOP++ )); do lava-test-case $TEST_NAME-execution-$LOOP --shell ./execute.sh $IPADDR:5555; done;
         - if [ -f logcat_canvas.log ]; then lava-test-run-attach logcat_canvas.log text/plain; fi
         - if [ -f logcat.log ]; then lava-test-run-attach logcat.log text/plain; fi
