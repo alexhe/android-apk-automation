@@ -17,6 +17,7 @@ run:
         - lava-test-case step1-cat-build-info --shell cat /system/build.prop
         - lava-test-case step2-get-adb --shell getprop service.adb.tcp.port
         - lava-test-case step3-set-adb --shell setprop service.adb.tcp.port 5555
+        - lava-test-case step3-set-adb-root --shell setprop service.adb.root 1
         - lava-test-case step4-stop-adbd --shell stop adbd
         - lava-test-case step5-start-adbd --shell start adbd
         - lava-test-case step6-send-ip --shell lava-send application-benchmark-target-ready-send-ip ipaddr=$(getprop dhcp.eth0.ipaddress)

@@ -20,27 +20,31 @@ kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': Fal
 vc = ViewClient(device, serialno, **kwargs2)
 while True:
     try:
+        time.sleep(5)
         vc.dump('-1')
         btn_start = vc.findViewWithTextOrRaise("Run SmartBench")
         btn_start.touch()
         break
+    except ViewNotFoundException:
+        pass
     except RuntimeError:
         pass
     except ValueError:
         pass
 
 finished = False
-btn_results = None
-while(not finished):
+while not finished:
     try:
         time.sleep(5)
         vc.dump('-1')
-        btn_results = vc.findViewWithText("Display Index Scores")
-        if btn_results:
-            finished = True
+        btn_results = vc.findViewWithTextOrRaise("Display Index Scores")
+        btn_results.touch()
+        time.sleep(3)
+        print "benchmark finished"
+        finished = True
+    except ViewNotFoundException:
+        pass
     except RuntimeError:
         pass
     except ValueError:
         pass
-print "benchmark finished"
-btn_results.touch()

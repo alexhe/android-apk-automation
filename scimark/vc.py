@@ -6,12 +6,16 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
-vc.dump()
 
+time.sleep(5)
+vc.dump()
 btn_java_bench = vc.findViewWithTextOrRaise(u'Java bench')
 btn_java_bench.touch()
 
@@ -32,7 +36,7 @@ while(not finished):
                     if key_val[0].strip() in keys:
                         key = key_val[0].strip().replace(' ', '_').replace('(', '').replace(')', '').replace(',', '')
                         print "%s=%s" % (key, key_val[1].strip())
-                        call(['lava-test-case', key, '--result', 'pass', '--measurement', key_val[1].strip(), '--units', 'Mflops'])
+                        call([f_output_result, key, 'pass', key_val[1].strip(), 'Mflops'])
     except ViewNotFoundException:
         pass
     except RuntimeError:

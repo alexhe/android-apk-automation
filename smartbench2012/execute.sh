@@ -7,7 +7,7 @@ test_method="python vc.py"
 apk_package="com.smartbench.twelve"
 
 #following should no need to modify
-parent_dir=`dirname ${0}`
+parent_dir=$(cd $(dirname ${0});pwd)
 source "${parent_dir}/../common/common.sh"
 post_uninstall="${parent_dir}/extract_results.sh"
 main "$@"

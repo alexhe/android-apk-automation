@@ -22,15 +22,16 @@ BASE_URL=""
 ## Description:
 ##    get specified the apk file from remote
 ## Usage:
-##    get_file_with_base_url $file_name $base_url $target_dir
+##    get_file_with_base_url $remote_relative_path $base_url $target_dir
 ## Example:
 ##    get_file_with_base_url "${apk_apk}" "${BASE_URL}" "${D_APKS}"
 get_file_with_base_url(){
-    local file_name=$1 && shift
+    local remote_rel_path=$1 && shift
+    base_name=$(basename ${remote_rel_path})
     local base_url=$1 && shift
     local target_dir=$1 && shift
 
-    if [ -z "${file_name}" ]; then
+    if [ -z "${remote_rel_path}" ]; then
         echo "The file name must be specified."
         return 1
     fi
@@ -45,19 +46,19 @@ get_file_with_base_url(){
         return 1
     fi
 
-    if [ -f "${target_dir}/${file_name}" ]; then
-        echo "The file($file_name) already exists."
+    if [ -f "${target_dir}/${base_name}" ]; then
+        echo "The file(${remote_rel_path}) already exists."
         return 0
     fi
     mkdir -p "${target_dir}"
     case "X${base_url}" in
         "Xscp://"*)
             # like scp://yongqin.liu@testdata.validation.linaro.org/home/yongqin.liu
-            apk_url="${base_url}/${file_name}"
+            apk_url="${base_url}/${remote_rel_path}"
             url_no_scp=`echo ${apk_url}|sed 's/^\s*scp\:\/\///'|sed 's/\//\:\//'`
-            scp "${url_no_scp}" "${target_dir}/${file_name}"
+            scp "${url_no_scp}" "${target_dir}/${base_name}"
             if [ $? -ne 0 ]; then
-                echo "Failed to get the apk(${file_name}) with ${base_url}"
+                echo "Failed to get the apk(${remote_rel_path}) with ${base_url}"
                 return 1
             fi
             ;;
@@ -69,14 +70,14 @@ get_file_with_base_url(){
             fi
             ;;
         "Xhttp://"*)
-            wget "${base_url}/${file_name}" -O "${target_dir}/${file_name}"
+            wget "${base_url}/${remote_rel_path}" -O "${target_dir}/${base_name}"
             if [ $? -ne 0 ]; then
                 echo "Failed to get the apks with ${base_url}"
                 return 1
             fi
             ;;
         "X"*)
-            echo "Failed to get the file($file_name)."
+            echo "Failed to get the file($remote_rel_path)."
             echo "The schema of the ${base_url} is not supported now!"
             return 1
             ;;
@@ -281,6 +282,7 @@ func_loop_apps_for_times(){
 
     for apk in ${loop_apps_list}; do
         local loop_app_apk=$(echo $apk|cut -d, -f1)
+        loop_app_apk=$(basename ${loop_app_apk})
         local loop_app_start_activity=$(echo $apk|cut -d, -f2)
         local loop_app_package=$(echo ${loop_app_start_activity}|cut -d\/ -f1)
         local loop_app_name=$(echo $apk|cut -d, -f3)
@@ -383,6 +385,8 @@ func_prepare_environment(){
     func_get_all_apks "$G_APPS"|| exit 1
 
     adb shell svc power stayon true
+    adb shell input keyevent MENU
+    adb shell input keyevent BACK
 }
 
 func_print_usage_common(){

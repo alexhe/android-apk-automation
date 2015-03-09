@@ -6,6 +6,9 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
@@ -34,7 +37,7 @@ while(not finished):
                 test_case_id = result.group('test_case_id').strip()
                 measurement = result.group('measurement').strip()
                 print "%s=%s Iterations/sec" % (test_case_id, measurement)
-                call(['lava-test-case', test_case_id, '--result', 'pass', '--measurement', measurement, '--units', 'Iterations/sec'])
+                call([f_output_result, test_case_id, 'pass', measurement, 'Iterations/sec'])
     except ViewNotFoundException:
         pass
     except RuntimeError:

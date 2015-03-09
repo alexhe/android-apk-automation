@@ -1,13 +1,17 @@
 # Author: Botao Sun <botao.sun@linaro.org>
 
+import os
 import sys
 import time
 from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
 def collect_score(benchmark_name, run_result, score_number, score_unit):
-    call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', score_number, '--units', score_unit])
+    call([f_output_result, benchmark_name, run_result, score_number, score_unit])
 
 benchmark_name = "BenchmarkPi"
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}

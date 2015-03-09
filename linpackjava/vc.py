@@ -6,6 +6,9 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh" % parent_dir
+
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
@@ -28,7 +31,7 @@ while(not finished):
             print "benchmark finished"
             speed = res_match.group('measurement').strip()
             print "%s=%s MFLOPS" % ("LinpackJavaSpeed", speed)
-            call(['lava-test-case', "LinpackJavaSpeed", '--result', 'pass', '--measurement', speed, '--units', 'MFLOPS'])
+            call([f_output_result, "LinpackJavaSpeed", 'pass', speed, 'MFLOPS'])
     except ViewNotFoundException:
         pass
     except RuntimeError:

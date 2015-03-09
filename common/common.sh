@@ -24,8 +24,7 @@ func_install_start_RotationAPK(){
     if [ -f "${apk_path}" ]; then
         echo "The file(${apk_path}) already exists."
     else
-        local apk_base_url="http://testdata.validation.linaro.org/apks/"
-        get_file_with_base_url "${apk_name}" "${apk_base_url}" "${D_APKS}"
+        get_file_with_base_url "${apk_name}" "${base_url}" "${D_APKS}"
     fi
     adb shell pm list packages | grep rotation.off
     if [ $? -ne 0 ]; then

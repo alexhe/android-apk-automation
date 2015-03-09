@@ -6,6 +6,9 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh" % parent_dir
+
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
@@ -26,8 +29,8 @@ while not start_single_button:
 mflops_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call(['lava-test-case', '"Linpack MFLOPS Single Score"', '--result', 'pass', '--measurement', mflops_single_score.getText(), '--units', 'MFLOPS'])
-call(['lava-test-case', '"Linpack Time Single Score"', '--result', 'pass', '--measurement', time_single_score.getText(), '--units', 'seconds'])
+call([f_output_result, 'LinpackMFLOPSSingleScore', 'pass', mflops_single_score.getText(), 'MFLOPS'])
+call([f_output_result, 'LinpackTimeSingleScore', 'pass', time_single_score.getText(), 'seconds'])
 
 start_multi_button = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/btncalculate")
 start_multi_button.touch()
@@ -42,5 +45,5 @@ while not start_single_button:
 mflops_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call(['lava-test-case', '"Linpack MFLOPS Multi Score"', '--result', 'pass', '--measurement', mflops_multi_score.getText(), '--units', 'MFLOPS'])
-call(['lava-test-case', '"Linpack Time Multi Score"', '--result', 'pass', '--measurement', time_multi_score.getText(), '--units', 'seconds'])
+call([f_output_result, 'LinpackMFLOPSMultiScore', 'pass', mflops_multi_score.getText(), 'MFLOPS'])
+call([f_output_result, 'LinpackTimeMultiScore', 'pass', time_multi_score.getText(), 'seconds'])
