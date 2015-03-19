@@ -23,7 +23,6 @@ metadata:
         - kvm
 
 params:
-    BASE_URL: "http://testdata.validation.linaro.org/apks/JavaBenchmark/pure-java-applications/"
     APP_CONFIG_LIST: ""
     LOOP_COUNT: 12
     COLLECT_STREAMLINE: "false"
@@ -37,8 +36,7 @@ run:
         - IPADDR=`awk -F '=' '{print $2}' /tmp/lava_multi_node_cache.txt`
         - adb connect $IPADDR
         - adb wait-for-device
-        - ./application-benchmark.sh --base-url "$BASE_URL" --loop-count "$LOOP_COUNT" --streamline "$COLLECT_STREAMLINE" $APP_CONFIG_LIST
-        - lava-test-run-attach rawdata.zip application/x-gzip
+        - ./application-benchmark.sh --loop-count "$LOOP_COUNT" --streamline "$COLLECT_STREAMLINE" $APP_CONFIG_LIST
         - lava-sync application-benchmark-stop-target
 
 parse:

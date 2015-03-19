@@ -19,22 +19,14 @@ function func_post_uninstall_bench_batch(){
     fi
 }
 
-func_post_test_batch(){
-    func_cleanup
-
-    sort ${f_result_csv}|tr ' ' '_'|tr -d '=' >${f_result_csv}.sort
-    statistic "${f_result_csv}.sort" 2|tee ${f_result_csv}.ok
-    sed -i 's/=/,/' "${f_result_csv}.ok"
-}
-
-function main(){
+function local_main(){
     echo "test timeout: ${timeout}"
     parent_dir=$(cd ${parent_dir}; pwd)
     export parent_dir=${parent_dir}
 
     var_func_parse_parameters=""
     var_func_prepare_environment="func_prepare_benchmark"
-    var_func_post_test="func_post_test_batch"
+    var_func_post_test="func_cleanup"
 
     var_func_pre_install=""
     var_func_post_install="${post_install}"
@@ -59,6 +51,4 @@ function main(){
     return ${ret_value}
 }
 
-rm -fr ${f_result_csv}
-
-main "$@"
+local_main "$@"

@@ -37,6 +37,5 @@ run:
         - IPADDR=`awk -F '=' '{print $2}' /tmp/lava_multi_node_cache.txt`
         - adb connect $IPADDR
         - adb wait-for-device
-        - ./java-benchmarks.sh --base-url "$BASE_URL" --loop-count "$LOOP_COUNT" --streamline "$COLLECT_STREAMLINE" $APP_CONFIG_LIST
-        - lava-test-run-attach rawdata.zip application/x-gzip
+        - ./java-benchmarks.sh --loop-count "$LOOP_COUNT" --streamline "$COLLECT_STREAMLINE" ${APP_CONFIG_LIST}
         - lava-sync application-benchmark-stop-target

@@ -39,8 +39,8 @@ while(not finished):
         if re.search('Total Elapsed Time', results.getText()):
             finished = True
             print "benchmark finished"
-            for line in results.getText().split("?"):
-                line = line.strip()
+            for line in results.getText().split('\n'):
+                line = str(line.strip())
                 elements = re.split(r'\s+', line)
                 if line.startswith('MWIPS'):
                     units = key_unit_hash['MWIPS']
@@ -52,7 +52,6 @@ while(not finished):
                     value = elements[2]
                 else:
                     continue
-                print "%s=%s %s" % (key, value, units)
                 call([f_output_result, key, 'pass', value, units])
     except ViewNotFoundException:
         pass

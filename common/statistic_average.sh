@@ -1,9 +1,5 @@
 #!/bin/bash
 
-local_common_file_path="${BASH_SOURCE[0]}"
-local_common_parent_dir=$(cd $(dirname ${local_common_file_path}); pwd)
-f_result_csv="${local_common_parent_dir}/../rawdata/final_result.csv"
-
 ## Description:
 ##    output the max value of the passed 2 parameters
 ## Usage:
@@ -104,52 +100,5 @@ statistic(){
             average=$(echo "scale=2; $total/$count"|bc)
         fi
         echo "$new_key=$average"
-    fi
-}
-
-## Description:
-##   output the test result to console and add for lava-test-shell,
-##   also write into one csv file for comparing manually
-## Usage:
-##    output_test_result $test_name $result [ $measurement [ $units ] ]
-output_test_result(){
-    local test_name=$1
-    local result=$2
-    local measurement=$3
-    local units=$4
-
-    if [ -z "${test_name}" ] || [ -z "$result" ]; then
-        return
-    fi
-    local output=""
-    local lava_paras=""
-    local output_csv=""
-    test_name=$(echo ${test_name}|tr ' ' '_')
-    if [ -z "${measurement}" ]; then
-        output="${test_name}=${result}"
-        lava_paras="${test_name} --result ${result}"
-    else
-        output="${test_name}=${measurement}"
-        lava_paras="${test_name} --result ${result} --measurement ${measurement}"
-        output_csv="${test_name},${measurement}"
-    fi
-
-    if [ -z "$units" ]; then
-        units="points"
-    fi
-    output="${output} ${units}"
-    lava_paras="${lava_paras} --units ${units}"
-
-    echo "${output}"
-
-    local cmd="lava-test-case"
-    if [ -n "$(which $cmd)" ];then
-        $cmd ${lava_paras}
-    else
-        echo "$cmd ${lava_paras}"
-    fi
-    if [ -n "${output_csv}" ];then
-        mkdir -p $(dirname ${f_result_csv})
-        echo "${output_csv}">>${f_result_csv}
     fi
 }

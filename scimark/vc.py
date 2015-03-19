@@ -30,12 +30,12 @@ while(not finished):
         if results.getText().find("Done") > 0:
             finished = True
             print "benchmark finished"
-            for line in results.getText().replace(": ?", ":").split("?"):
+            for line in results.getText().split("\n"):
+                line = str(line.strip())
                 key_val = line.split(":")
                 if len(key_val) == 2:
                     if key_val[0].strip() in keys:
                         key = key_val[0].strip().replace(' ', '_').replace('(', '').replace(')', '').replace(',', '')
-                        print "%s=%s" % (key, key_val[1].strip())
                         call([f_output_result, key, 'pass', key_val[1].strip(), 'Mflops'])
     except ViewNotFoundException:
         pass

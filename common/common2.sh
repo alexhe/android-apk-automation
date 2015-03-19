@@ -2,6 +2,8 @@
 
 local_common2_file_path="${BASH_SOURCE[0]}"
 local_common2_parent_dir=$(cd $(dirname ${local_common2_file_path}); pwd)
+source "${local_common2_parent_dir}/statistic_average.sh"
+
 D_ROOT=$(cd $(dirname ${local_common2_parent_dir}); pwd)
 
 D_RAWDATA="${D_ROOT}/rawdata"
@@ -10,6 +12,8 @@ F_RAWDAT_ZIP="${D_ROOT}/rawdata.zip"
 
 F_LOGCAT="${D_RAWDATA}/logcat.log"
 F_LOGCAT_EVENTS="${D_RAWDATA}/logcat-events.log"
+F_RAW_DATA_CSV="${D_RAWDATA}/final_raw_data_result.csv"
+F_STATISTIC_DATA_CSV="${D_RAWDATA}/final_statistic_result.csv"
 D_STREAMLINE="${D_RAWDATA}/streamline"
 D_SCREENSHOT="${D_RAWDATA}/screenshots"
 
@@ -17,6 +21,8 @@ COLLECT_STREAMLINE=false
 SERIAL=""
 G_APPS=""
 G_LOOP_COUNT=1
+[ -z "${G_RECORD_LOCAL_CSV}" ] && G_RECORD_LOCAL_CSV=TRUE
+[ -z "${G_VERBOSE_OUTPUT}" ] && G_VERBOSE_OUTPUT=FALSE
 BASE_URL=""
 
 ## Description:
@@ -378,9 +384,11 @@ func_prepare_environment(){
             export ANDROID_SERIAL=${serial}
         fi
     fi
+    export G_RECORD_LOCAL_CSV G_VERBOSE_OUTPUT
 
     rm -fr ${D_RAWDATA}
     mkdir -p "${D_STREAMLINE}" "${D_SCREENSHOT}" "${D_APKS}"
+    mkdir -p $(dirname ${F_RAW_DATA_CSV})
 
     func_get_all_apks "$G_APPS"|| exit 1
 
@@ -394,6 +402,9 @@ func_print_usage_common(){
     echo "     --serial: specify serial number for the device"
     echo "     --base-url: specify the based url where the apks will be gotten from"
     echo "     --loop-count: specify the number that how many times should be run for each application to get the average result, default is 12"
+    echo "     --record-csv: specify if record the result in csv format file."
+    echo "                   Only record the file when TRUE is specified."
+    echo "     --verbose-output: output the result and lava-test-case command for each test case each time it is run"
     echo "     --streamline: specify if we need to collect the streamline data, true amd false can be specified, default is fasle"
     echo "     APP_CONFIG_LIST: specify the configurations for each application as following format:"
     echo "             APK_NAME,PACKAGE_NAME/APP_ACTIVITY,APP_NICKNAME"
@@ -407,22 +418,56 @@ func_print_usage_common(){
 func_parse_parameters_common(){
     local para_loop_count=""
     local para_apps=""
+    local para_record_csv=""
+    local para_verbose_output=""
     while [ -n "$1" ]; do
         case "X$1" in
             X--base-url)
                 BASE_URL=$2
+                if [ -z "${BASE_URL}" ]; then
+                    echo "Please specify the value for --base-url option"
+                    exit 1
+                fi
+                shift 2
+                ;;
+            X--record-csv)
+                para_record_csv=$2
+                if [ -z "${para_record_csv}" ]; then
+                    echo "Please specify the value for --record-csv option"
+                    exit 1
+                fi
+                shift 2
+                ;;
+            X--verbose-output)
+                para_verbose_output=$2
+                if [ -z "${para_verbose_output}" ]; then
+                    echo "Please specify the value for --verbose-output option"
+                    exit 1
+                fi
                 shift 2
                 ;;
             X--streamline)
                 COLLECT_STREAMLINE=$2
+                if [ -z "${COLLECT_STREAMLINE}" ]; then
+                    echo "Please specify the value for --streamline option"
+                    exit 1
+                fi
                 shift 2
                 ;;
             X--loop-count)
                 para_loop_count=$2
+                if [ -z "${para_loop_count}" ]; then
+                    echo "Please specify the value for --loop-count option"
+                    exit 1
+                fi
                 shift 2
                 ;;
             X-s|X--serial)
                 SERIAL=$2
+                if [ -z "${SERIAL}" ]; then
+                    echo "Please specify the value for --serial|-s option"
+                    exit 1
+                fi
                 shift 2
                 ;;
             X-h|X--help)
@@ -456,6 +501,18 @@ func_parse_parameters_common(){
     if [ -n "${para_apps}" ]; then
         G_APPS="${para_apps}"
     fi
+
+    if [ -n "${para_record_csv}" ] && [ "X${para_record_csv}" = "XTRUE" ];then
+        G_RECORD_LOCAL_CSV=TRUE
+    elif [ -n "${para_record_csv}" ];then
+        G_RECORD_LOCAL_CSV=FALSE
+    fi
+
+    if [ -n "${para_verbose_output}" ] && [ "X${para_verbose_output}" = "XTRUE" ];then
+        G_VERBOSE_OUTPUT=TRUE
+    elif [ -n "${para_record_csv}" ];then
+        G_VERBOSE_OUTPUT=FALSE
+    fi
 }
 
 ## Description:
@@ -481,7 +538,7 @@ common_main(){
             exit 1
         fi
     else
-       func_parse_parameters_common
+       func_parse_parameters_common "$@"
     fi
 
     if [ -n "${var_func_prepare_environment}" ]; then
@@ -504,12 +561,103 @@ common_main(){
         fi
     fi
 
-    rm -fr "${F_RAWDAT_ZIP}"
-    local old_pwd=$(pwd)
-    local d_zip_dir="$(dirname ${D_RAWDATA})"
-    local d_zip_name="$(basename ${D_RAWDATA})"
-    cd ${d_zip_dir};
-    zip -r "${F_RAWDAT_ZIP}" "${d_zip_name}"
-    cd ${old_pwd}
-    echo "Please reference the file ${F_RAWDAT_ZIP} for all the raw data."
+    if [ "X${G_RECORD_LOCAL_CSV}" = "XTRUE" ]; then
+
+        if [ -f "${F_RAW_DATA_CSV}" ]; then
+            sort ${F_RAW_DATA_CSV}|tr ' ' '_'|tr -d '=' >${F_RAW_DATA_CSV}.sort
+            statistic ${F_RAW_DATA_CSV}.sort 2 |tee ${F_STATISTIC_DATA_CSV}
+            sed -i 's/=/,/' "${F_STATISTIC_DATA_CSV}"
+            rm -f ${F_RAW_DATA_CSV}.sort
+        fi
+
+        rm -fr "${F_RAWDAT_ZIP}"
+        local old_pwd=$(pwd)
+        local d_zip_dir="$(dirname ${D_RAWDATA})"
+        local d_zip_name="$(basename ${D_RAWDATA})"
+        cd ${d_zip_dir};
+        zip -r "${F_RAWDAT_ZIP}" "${d_zip_name}"
+        cd ${old_pwd}
+        echo "Please reference the file ${F_RAWDAT_ZIP} for all the raw data."
+        attach_for_lava "${F_RAWDAT_ZIP}" "application/x-gzip"
+    fi
+}
+
+## Description:
+##   output the test result to console and add for lava-test-shell,
+##   also write into one csv file for comparing manually
+## Usage:
+##    output_test_result $test_name $result [ $measurement [ $units ] ]
+## Note:
+##    G_RECORD_LOCAL_CSV: when this environment variant is set to "TRUE",
+##         the result will be recorded in a csv file in the following path:
+##              rawdata/final_result.csv
+##    G_VERBOSE_OUTPUT: when this environment variant is set to "TRUE", and only it is TRUE,
+##         the verbose informain about the result will be outputed
+output_test_result(){
+    local test_name=$1
+    local result=$2
+    local measurement=$3
+    local units=$4
+
+    if [ -z "${test_name}" ] || [ -z "$result" ]; then
+        return
+    fi
+    local output=""
+    local lava_paras=""
+    local output_csv=""
+    test_name=$(echo ${test_name}|tr ' ' '_')
+
+    if [ -z "$units" ]; then
+        units="points"
+    fi
+
+    if [ -z "${measurement}" ]; then
+        output="${test_name}=${result}"
+        lava_paras="${test_name} --result ${result}"
+    else
+        output="${test_name}=${measurement} ${units}"
+        lava_paras="${test_name} --result ${result} --measurement ${measurement} --units ${units}"
+        output_csv="${test_name},${measurement}"
+    fi
+
+    if [ "X${G_VERBOSE_OUTPUT}" = "XTRUE" ];then
+        echo "${output}"
+    fi
+
+    local cmd="lava-test-case"
+    if [ -n "$(which $cmd)" ];then
+        $cmd ${lava_paras}
+    elif [ "X${G_VERBOSE_OUTPUT}" = "XTRUE" ];then
+        echo "$cmd ${lava_paras}"
+    fi
+
+    if [ "X${G_RECORD_LOCAL_CSV}" = "XTRUE" ]; then
+        if [ -n "${output_csv}" ];then
+            echo "${output_csv}">>${F_RAW_DATA_CSV}
+        fi
+    fi
+}
+
+## Description:
+##   run lava-test-run-attach to attach the file for lava
+## Usage:
+##     attach_for_lava "${f_path}" "$f_mime_type"
+## Example:
+##     attach_for_lava logcat.log text/plain
+##     attach_for_lava rawdata.zip application/x-gzip
+attach_for_lava(){
+    local f_path=$1
+    local f_mime_type=$2
+
+    if [ ! -f "${f_path}" ]; then
+        return
+    fi
+    if [ -z "${f_mime_type}" ]; then
+        f_mime_type="text/plain"
+    fi
+    local cmd="lava-test-run-attach"
+
+    if [ -n "$(which $cmd)" ];then
+        ${cmd} ${f_path} ${f_mime_type}
+    fi
 }
