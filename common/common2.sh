@@ -617,6 +617,7 @@ output_test_result(){
     else
         output="${test_name}=${measurement} ${units}"
         lava_paras="${test_name} --result ${result} --measurement ${measurement} --units ${units}"
+        ## should support units after measurement format
         output_csv="${test_name},${measurement}"
     fi
 
