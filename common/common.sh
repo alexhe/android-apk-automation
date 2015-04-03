@@ -60,7 +60,11 @@ func_run_test_bench(){
             timeout ${var_test_command_timeout} ${test_command}
             ret=$?
             if [ $ret -eq 124 ]; then
+                local tmp_f_name=$(basename $(mktemp -u -t timeout_screen_XXX.png))
+                adb shell screencap /data/local/tmp/${tmp_f_name}
+                adb pull /data/local/tmp/${tmp_f_name} ${D_SCREENSHOT}/${tmp_f_name}
                 echo  "Time out to run ${test_command}: ${var_test_command_timeout}"
+                echo  "You can check ${D_SCREENSHOT}/${tmp_f_name} for reference."
             fi
         else
             ${test_command}
