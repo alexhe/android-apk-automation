@@ -6,19 +6,38 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
 default_unit = 'points'
 def get_score_with_content_desc(vc, content_desc, offset=1):
     try:
-        score_view = vc.findViewWithTextOrRaise(content_desc)
+        found_score_view = False
+        while not found_score_view:
+            score_view = vc.findViewWithText(content_desc)
+            if not score_view:
+                device.press('DPAD_DOWN')
+                time.sleep(2)
+                try:
+                    vc.dump()
+                except RuntimeError as e:
+                    pass
+                except ValueError as e:
+                    pass
+            else:
+                found_score_view = True
+
         score_uid = score_view.getUniqueId()
         uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
         score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
         score_text = score.getText()
         if score_text.find("%") > 0:
             score_value, units = score_text.split(" ")
-            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_value, '--units', units])
+            call([f_output_result, content_desc, 'pass', score_value, units])
+
         else:
-            call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score_text, '--units', default_unit])
+            call([f_output_result, content_desc, 'pass', score_text, default_unit])
     except ViewNotFoundException:
         print "%s not found" % (content_desc)
         pass
@@ -38,19 +57,23 @@ start_button.touch()
 finished = False
 while(not finished):
     try:
-        time.sleep(1)
-        vc.dump('-1')
+        time.sleep(5)
+        vc.dump()
         progress_button = vc.findViewByIdOrRaise("eu.chainfire.cfbench:id/admob_preference_layout")
         finished = True
     except ViewNotFoundException:
         pass
     except RuntimeError as e:
-        print e
+        pass
+    except ValueError as e:
+        pass
 print("Benchmark Finished")
 
-device.drag((300,1000), (300,300), 300)
-time.sleep(5)
-vc.dump(window='-1')
+vc.dump()
+result_label = vc.findViewWithTextOrRaise(u'Results')
+result_label.touch()
+device.press('DPAD_DOWN')
+time.sleep(2)
 
 #Fetch Scores
 get_score_with_content_desc(vc, "Native MIPS")
@@ -66,12 +89,6 @@ get_score_with_content_desc(vc, "Native Memory Write")
 get_score_with_content_desc(vc, "Java Memory Write")
 get_score_with_content_desc(vc, "Native Disk Read")
 get_score_with_content_desc(vc, "Native Disk Write")
-
-# drag screen once more to reveal remaining results
-device.drag((300,1000), (300,300), 300)
-time.sleep(5)
-vc.dump(window='-1')
-
 get_score_with_content_desc(vc, "Java Efficiency MIPS")
 get_score_with_content_desc(vc, "Java Efficiency MSFLOPS")
 get_score_with_content_desc(vc, "Java Efficiency MDFLOPS")
