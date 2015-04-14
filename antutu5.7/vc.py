@@ -85,32 +85,40 @@ def run_test(prefix=""):
     to_detail = False
     while(not to_detail):
         try:
-            time.sleep(5)
+            time.sleep(30)
             dump_always()
-            detail_btn = vc.findViewById("com.antutu.ABenchMark:id/detail_btn")
-            if detail_btn:
+            if vc.findViewWithText('Details - v5.7'):
+                to_detail = True
+                print("Already in the details page")
+            elif vc.findViewById("com.antutu.ABenchMark:id/detail_btn"):
+                detail_btn = vc.findViewById("com.antutu.ABenchMark:id/detail_btn")
                 detail_btn.touch()
                 to_detail = True
                 print("Found the Details button, the test should be run successfully")
             elif vc.findViewWithText('Unfortunately, AnTuTu Benchmark has stopped.'):
                 ok_btn = vc.findViewWithTextOrRaise(u'OK')
                 ok_btn.touch()
+                print("Closed the 'Unfortunately, AnTuTu Benchmark has stopped.' dialog.")
             elif vc.findViewWithText('Benchmarking has stopped unexpectedly. Please try again!'):
                 ok_btn = vc.findViewWithTextOrRaise(u'OK')
                 ok_btn.touch()
+                dump_always()
                 retest_btn = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/retest_text")
                 retest_btn.touch()
                 time.sleep(2)
                 dump_always()
                 retest_btn = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/retest_btn")
                 retest_btn.touch()
-            else:
+                print("Benchmarking has stopped unexpectedly, restart again")
+            elif vc.findViewById("com.antutu.ABenchMark:id/start_test_region"):
                 # seems not sure? this seems start a new test again
                 start_test_button = vc.findViewById("com.antutu.ABenchMark:id/start_test_region")
-                if start_test_button:
-                    start_test_button.touch()
-                    to_detail = True
-                    print("Found the Test button again, the test might not be run successfully, or no  network connection")
+                start_test_button.touch()
+                to_detail = True
+                print("Found the Test button again, the test might not be run successfully, or no  network connection")
+            else:
+                print("Wait for conditions to go to details page")
+
         except ViewNotFoundException:
             print("Got ViewNotFoundException when go to the detail page while waiting for test finished")
         except RuntimeError:
@@ -123,7 +131,7 @@ def run_test(prefix=""):
         try:
             time.sleep(2)
             dump_always()
-            vc.findViewWithTextOrRaise('Details - v5.6.2')
+            vc.findViewWithTextOrRaise('Details - v5.7')
             close_view = vc.findViewById("com.antutu.ABenchMark:id/close_img_view")
             if close_view:
                 close_view.touch()
@@ -142,22 +150,27 @@ def get_result(prefix=""):
     if prefix:
         prefix = "%s_" % prefix
     #Get the score
+    antutu_sum = 0;
     dump_always()
     multitask_view = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/ue_multitask_text")
     multitask_score = multitask_view.getText().strip()
-    call([f_output_result, "%santutu_5_6_2_ue_multitask" % prefix, 'pass', multitask_score, 'points'])
+    call([f_output_result, "%santutu_ue_multitask" % prefix, 'pass', multitask_score, 'points'])
+    antutu_sum = antutu_sum + int(multitask_score)
 
     runtime_view = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/ue_dalvik_text")
     runtime_score = runtime_view.getText().strip()
-    call([f_output_result, "%santutu_5_6_2_ue_runtime" % prefix, 'pass', runtime_score, 'points'])
+    call([f_output_result, "%santutu_ue_runtime" % prefix, 'pass', runtime_score, 'points'])
+    antutu_sum = antutu_sum + int(runtime_score)
 
     cpu_multi_integer_view = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/cpu_int_text")
     cpu_multi_integer_score = cpu_multi_integer_view.getText().strip()
-    call([f_output_result, "%santutu_5_6_2_cpu_integer" % prefix, 'pass', cpu_multi_integer_score, 'points'])
+    call([f_output_result, "%santutu_cpu_integer" % prefix, 'pass', cpu_multi_integer_score, 'points'])
+    antutu_sum = antutu_sum + int(cpu_multi_integer_score)
 
     cpu_multi_float_point_view = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/cpu_float_text")
     cpu_multi_float_point_score = cpu_multi_float_point_view.getText().strip()
-    call([f_output_result, "%santutu_5_6_2_cpu_float_point" % prefix, 'pass', cpu_multi_float_point_score, 'points'])
+    call([f_output_result, "%santutu_cpu_float_point" % prefix, 'pass', cpu_multi_float_point_score, 'points'])
+    antutu_sum = antutu_sum + int(cpu_multi_float_point_score)
 
     device.press('DPAD_DOWN')
     time.sleep(2)
@@ -166,29 +179,39 @@ def get_result(prefix=""):
     dump_always()
 
     cpu_single_integer_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/cpu_int_text2")
-    call([f_output_result, "%santutu_5_6_2_single_thread_integer" % prefix, 'pass', cpu_single_integer_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_single_thread_integer" % prefix, 'pass', cpu_single_integer_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(cpu_single_integer_score.getText().strip())
 
     cpu_single_float_point_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/cpu_float_text2")
-    call([f_output_result, "%santutu_5_6_2_single_float_point" % prefix, 'pass', cpu_single_float_point_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_single_float_point" % prefix, 'pass', cpu_single_float_point_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(cpu_single_float_point_score.getText().strip())
 
     ram_operation_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/mem_text")
-    call([f_output_result, "%santutu_5_6_2_single_ram_operation" % prefix, 'pass', ram_operation_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_single_ram_operation" % prefix, 'pass', ram_operation_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(ram_operation_score.getText().strip())
 
     ram_speed_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/ram_text")
-    call([f_output_result, "%santutu_5_6_2_single_ram_speed" % prefix, 'pass', ram_speed_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_single_ram_speed" % prefix, 'pass', ram_speed_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(ram_speed_score.getText().strip())
 
     twod_graphics_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/gpu_2d_text")
-    call([f_output_result, "%santutu_5_6_2_2D_graphics" % prefix, 'pass', twod_graphics_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_2D_graphics" % prefix, 'pass', twod_graphics_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(twod_graphics_score.getText().strip())
 
     threed_graphics_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/gpu_3d_text")
     score_3d = threed_graphics_score.getText().strip()
-    call([f_output_result, "%santutu_5_6_2_3D_graphics" % prefix, 'pass', score_3d.split(" ").pop(), 'points'])
+    call([f_output_result, "%santutu_3D_graphics" % prefix, 'pass', score_3d.split(" ").pop(), 'points'])
+    antutu_sum = antutu_sum + int(score_3d.split(" ").pop())
 
     storage_io_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/io_sdw_text")
-    call([f_output_result, "%santutu_5_6_2_storage_io" % prefix, 'pass', storage_io_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_storage_io" % prefix, 'pass', storage_io_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(storage_io_score.getText().strip())
 
     database_io_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/io_db_text")
-    call([f_output_result, "%santutu_5_6_2_database_io" % prefix, 'pass', database_io_score.getText().strip(), 'points'])
+    call([f_output_result, "%santutu_database_io" % prefix, 'pass', database_io_score.getText().strip(), 'points'])
+    antutu_sum = antutu_sum + int(database_io_score.getText().strip())
+
+    call([f_output_result, "%santutu_total" % prefix, 'pass', str(antutu_sum), 'points'])
 
 
 def main():
