@@ -48,6 +48,8 @@ while(not finished):
             finished = True
     except RuntimeError:
         pass
+    except ValueError:
+        pass
 
 print "benchmark finished"
 
@@ -85,4 +87,9 @@ call(['lava-test-case', '"AnTuTu 3.3.2 3D Score"', '--result', 'pass', '--measur
 call(['lava-test-case', '"AnTuTu 3.3.2 Mem Score"', '--result', 'pass', '--measurement', mem_score.getText(), '--units', default_unit])
 call(['lava-test-case', '"AnTuTu 3.3.2 DB Score"', '--result', 'pass', '--measurement', db_score.getText(), '--units', default_unit])
 call(['lava-test-case', '"AnTuTu 3.3.2 SD Write Score"', '--result', 'pass', '--measurement', sd_write_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 3.3.2 SD Read Score"', '--result', 'pass', '--measurement', sd_write_score.getText(), '--units', default_unit])
+call(['lava-test-case', '"AnTuTu 3.3.2 SD Read Score"', '--result', 'pass', '--measurement', sd_read_score.getText(), '--units', default_unit])
+
+total_score = int(cpu_int_score.getText().strip()) + int(cpu_float_score.getText().strip()) + int(twod_score.getText().strip().split(" ")[1])
+total_score = total_score + int(threed_score.getText().strip().split(" ")[1]) + int(mem_score.getText().strip()) + int(db_score.getText().strip())
+total_score = total_score + int(sd_write_score.getText().strip().split(' ').pop()) + int(sd_read_score.getText().strip().split(' ').pop())
+call(['lava-test-case', '"AnTuTu 3.3.2 Total Score"', '--result', 'pass', '--measurement', str(total_score), '--units', default_unit])

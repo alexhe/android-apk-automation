@@ -83,3 +83,11 @@ call(['lava-test-case', '"AnTuTu 4.0.3 GPU 2D Graphics Score"', '--result', 'pas
 call(['lava-test-case', '"AnTuTu 4.0.3 GPU 3D Graphics Score"', '--result', 'pass', '--measurement', threed_graphics_score.getText().split(" ")[1], '--units', default_unit])
 call(['lava-test-case', '"AnTuTu 4.0.3 IO Storage I/O Score"', '--result', 'pass', '--measurement', storage_io_score.getText(), '--units', default_unit])
 call(['lava-test-case', '"AnTuTu 4.0.3 IO Database I/O Score"', '--result', 'pass', '--measurement', database_io_score.getText(), '--units', default_unit])
+
+total_score = 0
+total_score = total_score + int(multitask_score.getText().strip()) + int(dalvik_score.getText().strip())
+total_score = total_score + int(cpu_integer_score.getText().strip()) + int(cpu_float_point_score.getText().strip())
+total_score = total_score + int(ram_operation_score.getText().strip()) + int(ram_speed_score.getText().strip())
+total_score = total_score + int(twod_graphics_score.getText().strip().split(" ")[1]) + int(threed_graphics_score.getText().strip().split(" ")[1])
+total_score = total_score + int(storage_io_score.getText().strip().split(' ').pop()) + int(database_io_score.getText().strip().split(' ').pop())
+call(['lava-test-case', '"AnTuTu 4.0.3 Total Score"', '--result', 'pass', '--measurement', str(total_score), '--units', default_unit])

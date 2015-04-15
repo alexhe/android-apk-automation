@@ -21,4 +21,5 @@ function change_no_update(){
 parent_dir=`dirname ${0}`
 source "${parent_dir}/../common/common.sh"
 post_install="change_no_update"
+timeout=30m
 main "$@"
