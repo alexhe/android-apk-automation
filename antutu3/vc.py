@@ -10,34 +10,48 @@ kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
-time.sleep(5)
-vc.dump(window='-1')
+
+def dump_always():
+    success = False
+    while not success:
+        try:
+            vc.dump()
+            success = True
+        except RuntimeError:
+            print("Got RuntimeError when call vc.dump()")
+            time.sleep(5)
+        except ValueError:
+            print("Got ValueError when call vc.dump()")
+            time.sleep(5)
+
 
 # release info and upgrade dialog are not presented
 # if there is no connection to Internet
 try:
+    time.sleep(5)
+    dump_always()
     button_cancel = vc.findViewByIdOrRaise("android:id/button2")
     button_cancel.touch()
 except ViewNotFoundException:
     pass
 
 try:
-    vc.dump(window='-1')
     time.sleep(2)
+    dump_always()
     button_ok = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/button_ok")
     button_ok.touch()
 except ViewNotFoundException:
     pass
 
-time.sleep(2)
-vc.dump(window='-1')
-button_test = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/btn_test_now")
-button_test.touch()
-
-#time.sleep(2)
-#vc.dump(window='-1')
-#button_start_test = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/button_test")
-#button_start_test.touch()
+found_test_btn = False
+while not found_test_btn:
+    try:
+        dump_always()
+        button_test = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/btn_test_now")
+        button_test.touch()
+        found_test_btn = True
+    except ViewNotFoundException:
+        print("Not find com.antutu.ABenchMark:id/btn_test_now yet, continue")
 
 finished = False
 while(not finished):
@@ -63,13 +77,13 @@ for index in range(0, 3):
         device.press('KEYCODE_BACK')
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 header = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/layoutScoresHeader")
 if not vc.findViewById("com.antutu.ABenchMark:id/layoutScores"):
     header.touch()
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 mem_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_mem")
 cpu_int_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_int")
 cpu_float_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_float")
@@ -78,7 +92,7 @@ threed_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_3d")
 db_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_db")
 sd_write_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdw")
 sd_read_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdr")
-default_unit = 'Inapplicable'
+default_unit = 'points'
 
 call(['lava-test-case', '"AnTuTu 3.3.2 CPU Integer Score"', '--result', 'pass', '--measurement', cpu_int_score.getText(), '--units', default_unit])
 call(['lava-test-case', '"AnTuTu 3.3.2 CPU Float Score"', '--result', 'pass', '--measurement', cpu_float_score.getText(), '--units', default_unit])
