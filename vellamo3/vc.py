@@ -10,15 +10,10 @@ from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
 parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
 
 # Result collection for LAVA
-debug_switcher = False
 default_unit = 'Points'
-def collect_result(testcase, result, score, default_unit):
-    if debug_switcher == False:
-        call(['lava-test-case', testcase, '--result', result, '--measurement', str(score), '--units', default_unit])
-    else:
-        print ['lava-test-case', testcase, '--result', result, '--measurement', str(score), '--units', default_unit]
 
 def extract_scores(filename):
     # This is one-line file, read it in a whole
@@ -27,9 +22,11 @@ def extract_scores(filename):
     result_flag = 'benchmark_results'
     chapter_flag = 'chapter_name'
 
+    total_score = 0
     for item in jsoncontent:
         if result_flag and chapter_flag in item.keys():
             chapter = item[chapter_flag]
+            chapter_total = 0
             print str(len(item[result_flag])) + ' test result found in category: ' + chapter
             for elem in item[result_flag]:
                 if 'failed' in elem.keys() and 'id' in elem.keys() and 'score' in elem.keys():
@@ -43,13 +40,20 @@ def extract_scores(filename):
                     # Pick up the test score
                     score = elem['score']
                     # Submit the result to LAVA
-                    collect_result(testcase, result, score, default_unit)
+                    call([f_output_result, testcase, result, str(score), default_unit])
+                    chapter_total = chapter_total + score
                 else:
                     print 'Corrupted test result found, please check it manually.'
                     print 'A valid test result must contain id, score and pass/fail status.'
+
+            call([f_output_result, chapter+"_total", "pass", str(chapter_total), default_unit])
+            total_score = total_score + chapter_total
+
         else:
             print 'Cannot find ' + result_flag + ' or ' + chapter_flag + ' in test result dictionary. Please check it manually.'
     fileopen.close()
+    call([f_output_result, "total_score", "pass", str(total_score), default_unit])
+
 
 def vc_dump(vc):
     for i in range(0, 3):
