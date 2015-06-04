@@ -40,19 +40,19 @@ def extract_scores(filename):
                     # Pick up the test score
                     score = elem['score']
                     # Submit the result to LAVA
-                    call([f_output_result, testcase, result, str(score), default_unit])
+                    call([f_output_result, "vellamo3_" + testcase, result, str(score), default_unit])
                     chapter_total = chapter_total + score
                 else:
                     print 'Corrupted test result found, please check it manually.'
                     print 'A valid test result must contain id, score and pass/fail status.'
 
-            call([f_output_result, chapter+"_total", "pass", str(chapter_total), default_unit])
+            call([f_output_result, "vellamo3_" + chapter + "_total", "pass", str(chapter_total), default_unit])
             total_score = total_score + chapter_total
 
         else:
             print 'Cannot find ' + result_flag + ' or ' + chapter_flag + ' in test result dictionary. Please check it manually.'
     fileopen.close()
-    call([f_output_result, "total_score", "pass", str(total_score), default_unit])
+    call([f_output_result, "vellamo3_total_score", "pass", str(total_score), default_unit])
 
 
 def vc_dump(vc):
