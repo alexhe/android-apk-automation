@@ -20,9 +20,10 @@ D_SCREENSHOT="${D_RAWDATA}/screenshots"
 COLLECT_STREAMLINE=false
 SERIAL=""
 G_APPS=""
-G_LOOP_COUNT=1
+G_LOOP_COUNT=13
 [ -z "${G_RECORD_LOCAL_CSV}" ] && G_RECORD_LOCAL_CSV=TRUE
 [ -z "${G_VERBOSE_OUTPUT}" ] && G_VERBOSE_OUTPUT=FALSE
+[ -z "${G_RECORD_STATISTICS}" ] && G_RECORD_STATISTICS=TRUE
 BASE_URL=""
 
 ## Description:
@@ -407,8 +408,9 @@ func_print_usage_common(){
     echo "     --base-url: specify the based url where the apks will be gotten from"
     echo "     --loop-count: specify the number that how many times should be run for each application to get the average result, default is 12"
     echo "     --record-csv: specify if record the result in csv format file."
-    echo "                   Only record the file when TRUE is specified."
-    echo "     --verbose-output: output the result and lava-test-case command for each test case each time it is run"
+    echo "                   Only record the file when TRUE is specified. Default is TRUE"
+    echo "     --verbose-output: output the result and lava-test-case command for each test case each time it is run. Default is FALSE."
+    echo "     --record-statistics: output the statistics data as the test result. default is TRUE"
     echo "     --streamline: specify if we need to collect the streamline data, true amd false can be specified, default is fasle"
     echo "     APP_CONFIG_LIST: specify the configurations for each application as following format:"
     echo "             APK_NAME,PACKAGE_NAME/APP_ACTIVITY,APP_NICKNAME"
@@ -424,12 +426,21 @@ func_parse_parameters_common(){
     local para_apps=""
     local para_record_csv=""
     local para_verbose_output=""
+    local para_record_statistics=""
     while [ -n "$1" ]; do
         case "X$1" in
             X--base-url)
                 BASE_URL=$2
                 if [ -z "${BASE_URL}" ]; then
                     echo "Please specify the value for --base-url option"
+                    exit 1
+                fi
+                shift 2
+                ;;
+            X--record-statistics)
+                para_record_statistics=$2
+                if [ -z "${para_record_statistics}" ]; then
+                    echo "Please specify the value for --record-statistics option"
                     exit 1
                 fi
                 shift 2
@@ -517,6 +528,12 @@ func_parse_parameters_common(){
     elif [ -n "${para_record_csv}" ];then
         G_VERBOSE_OUTPUT=FALSE
     fi
+
+    if [ -n "${para_record_statistics}" ] && [ "X${para_record_statistics}" = "XTRUE" ];then
+        G_RECORD_STATISTICS=TRUE
+    elif [ -n "${para_record_statistics}" ]; then
+        G_RECORD_STATISTICS=FALSE
+    fi
 }
 
 ## Description:
@@ -569,9 +586,26 @@ common_main(){
 
         if [ -f "${F_RAW_DATA_CSV}" ]; then
             sort ${F_RAW_DATA_CSV}|tr ' ' '_'|tr -d '=' >${F_RAW_DATA_CSV}.sort
-            statistic ${F_RAW_DATA_CSV}.sort 2 |tee ${F_STATISTIC_DATA_CSV}
+            statistic ${F_RAW_DATA_CSV}.sort 2 3|tee ${F_STATISTIC_DATA_CSV}
             sed -i 's/=/,/' "${F_STATISTIC_DATA_CSV}"
             rm -f ${F_RAW_DATA_CSV}.sort
+            
+            if [ "X${G_RECORD_STATISTICS}" = "XTRUE" ] ;then
+                G_RECORD_STATISTICS="FALSE"
+                G_RECORD_LOCAL_CSV="FALSE"
+                local old_record_local_csv="${G_RECORD_LOCAL_CSV}"
+                for line in $(cat "${F_STATISTIC_DATA_CSV}"); do
+                    if ! echo "$line"|grep -q ,; then
+                        continue
+                    fi
+                    local key=$(echo $line|cut -d, -f1)
+                    local measurement=$(echo $line|cut -d, -f2)
+                    local units=$(echo $line|cut -d, -f3)
+                    output_test_result "${key}" "pass" "${measurement}" "${units}"
+                done
+                G_RECORD_STATISTICS=TRUE
+                G_RECORD_LOCAL_CSV="${old_record_local_csv}"
+            fi
         fi
 
         rm -fr "${F_RAWDAT_ZIP}"
@@ -597,6 +631,8 @@ common_main(){
 ##              rawdata/final_result.csv
 ##    G_VERBOSE_OUTPUT: when this environment variant is set to "TRUE", and only it is TRUE,
 ##         the verbose informain about the result will be outputed
+##    G_RECORD_STATISTICS: only when this environment variant is set to "FALSE",
+##         lava-test-case will be executed to report the result to LAVA for each raw data.
 output_test_result(){
     local test_name=$1
     local result=$2
@@ -609,11 +645,12 @@ output_test_result(){
     local output=""
     local lava_paras=""
     local output_csv=""
-    test_name=$(echo ${test_name}|tr ' ' '_')
+    test_name=$(echo ${test_name}|tr ' ,' '_')
 
     if [ -z "$units" ]; then
         units="points"
     fi
+    units=$(echo ${units}|tr ' ,' '_')
 
     if [ -z "${measurement}" ]; then
         output="${test_name}=${result}"
@@ -622,7 +659,7 @@ output_test_result(){
         output="${test_name}=${measurement} ${units}"
         lava_paras="${test_name} --result ${result} --measurement ${measurement} --units ${units}"
         ## should support units after measurement format
-        output_csv="${test_name},${measurement}"
+        output_csv="${test_name},${measurement},${units}"
     fi
 
     if [ "X${G_VERBOSE_OUTPUT}" = "XTRUE" ];then
@@ -630,7 +667,7 @@ output_test_result(){
     fi
 
     local cmd="lava-test-case"
-    if [ -n "$(which $cmd)" ];then
+    if [ "X${G_RECORD_STATISTICS}" = "XFALSE" ] && [ -n "$(which $cmd)" ];then
         $cmd ${lava_paras}
     elif [ "X${G_VERBOSE_OUTPUT}" = "XTRUE" ];then
         echo "$cmd ${lava_paras}"

@@ -29,8 +29,8 @@ while not start_single_button:
 mflops_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_single_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call([f_output_result, 'LinpackMFLOPSSingleScore', 'pass', mflops_single_score.getText(), 'MFLOPS'])
-call([f_output_result, 'LinpackTimeSingleScore', 'pass', time_single_score.getText(), 'seconds'])
+call([f_output_result, 'Linpack_MFLOPSSingleScore', 'pass', mflops_single_score.getText(), 'MFLOPS'])
+call([f_output_result, 'Linpack_TimeSingleScore', 'pass', time_single_score.getText(), 'seconds'])
 
 start_multi_button = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/btncalculate")
 start_multi_button.touch()
@@ -45,5 +45,5 @@ while not start_single_button:
 mflops_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txtmflops_result")
 time_multi_score = vc.findViewByIdOrRaise("com.greenecomputing.linpack:id/txttime_result")
 
-call([f_output_result, 'LinpackMFLOPSMultiScore', 'pass', mflops_multi_score.getText(), 'MFLOPS'])
-call([f_output_result, 'LinpackTimeMultiScore', 'pass', time_multi_score.getText(), 'seconds'])
+call([f_output_result, 'Linpack_MFLOPSMultiScore', 'pass', mflops_multi_score.getText(), 'MFLOPS'])
+call([f_output_result, 'Linpack_TimeMultiScore', 'pass', time_multi_score.getText(), 'seconds'])

@@ -6,13 +6,18 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh" % parent_dir
 default_unit = 'points'
+
+
 def get_score_with_text(vc, text, offset=1):
     score_view = vc.findViewWithTextOrRaise(text)
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    call(['lava-test-case', text.strip(), '--result', 'pass', '--measurement', score.getText().strip(), '--units', default_unit])
+    call([f_output_result, "sqlite_" + text.strip().replace(" ", "_"), 'pass', score.getText().strip(), default_unit])
+
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)

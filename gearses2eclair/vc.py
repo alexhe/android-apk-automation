@@ -6,10 +6,11 @@ import time
 from subprocess import call
 
 parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
 
 
 def collect_score(benchmark_name, run_result, score_number, score_unit):
-    call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
+    call([f_output_result, benchmark_name, run_result, str(score_number), score_unit])
 
 benchmark_name = "GearsES2eclair"
 time.sleep(60)
@@ -51,4 +52,4 @@ else:
     sys.exit(1)
 
 # Submit the test result to LAVA
-collect_score(benchmark_name, run_result, score_number, score_unit)
+collect_score("gearses2eclair_" + benchmark_name, run_result, score_number, score_unit)

@@ -34,10 +34,10 @@ def get_score_with_content_desc(vc, content_desc, offset=1):
         score_text = score.getText()
         if score_text.find("%") > 0:
             score_value, units = score_text.split(" ")
-            call([f_output_result, content_desc, 'pass', score_value, units])
+            call([f_output_result, "cfbench_" + content_desc.replace(" ", "_"), 'pass', score_value, units])
 
         else:
-            call([f_output_result, content_desc, 'pass', score_text, default_unit])
+            call([f_output_result, "cfbench_" + content_desc.replace(" ", "_"), 'pass', score_text, default_unit])
     except ViewNotFoundException:
         print "%s not found" % (content_desc)
         pass

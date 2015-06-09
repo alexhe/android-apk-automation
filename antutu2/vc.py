@@ -6,13 +6,37 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
+default_unit = 'points'
+
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
-time.sleep(5)
-vc.dump(window='-1')
 
+
+def dump_always():
+    success = False
+    while not success:
+        try:
+            vc.dump()
+            success = True
+        except RuntimeError:
+            print("Got RuntimeError when call vc.dump()")
+            time.sleep(5)
+        except ValueError:
+            print("Got ValueError when call vc.dump()")
+            time.sleep(5)
+
+
+def output_result(test_name, measurement):
+    call([f_output_result, "antutu282_" + test_name, 'pass',  measurement, default_unit])
+
+
+time.sleep(5)
+dump_always()
 # release info and upgrade dialog are not presented
 # if there is no connection to Internet
 try:
@@ -22,7 +46,7 @@ except ViewNotFoundException:
     pass
 
 try:
-    vc.dump(window='-1')
+    dump_always()
     time.sleep(2)
     button_ok = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/button_ok")
     button_ok.touch()
@@ -30,12 +54,12 @@ except ViewNotFoundException:
     pass
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 button_test = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/btn_test")
 button_test.touch()
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 button_start_test = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/button_test")
 button_start_test.touch()
 
@@ -43,7 +67,7 @@ finished = False
 while(not finished):
     time.sleep(1)
     try:
-        vc.dump(window='-1')
+        dump_always()
         if vc.findViewById("com.antutu.ABenchMark:id/layoutScoresHeader"):
             finished = True
     except RuntimeError as e:
@@ -55,20 +79,20 @@ print "benchmark finished"
 # close unnecessary windows if they appear
 for index in range(0, 3):
     time.sleep(1)
-    vc.dump(window='-1')
+    dump_always()
     if vc.findViewById("com.antutu.ABenchMark:id/num_1"):
         break
     else:
         device.press('KEYCODE_BACK')
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 header = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/layoutScoresHeader")
 if not vc.findViewById("com.antutu.ABenchMark:id/layoutScores"):
     header.touch()
 
 time.sleep(2)
-vc.dump(window='-1')
+dump_always()
 mem_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_mem")
 cpu_int_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_int")
 cpu_float_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_float")
@@ -77,18 +101,17 @@ threed_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_3d")
 db_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_db")
 sd_write_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdw")
 sd_read_score = vc.findViewByIdOrRaise("com.antutu.ABenchMark:id/text_sdr")
-default_unit = 'Inapplicable'
 
-call(['lava-test-case', '"AnTuTu 2.8.2 CPU Integer Score"', '--result', 'pass', '--measurement', cpu_int_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 CPU Float Score"', '--result', 'pass', '--measurement', cpu_float_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 2D Score"', '--result', 'pass', '--measurement', twod_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 3D Score"', '--result', 'pass', '--measurement', threed_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 Mem Score"', '--result', 'pass', '--measurement', mem_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 DB Score"', '--result', 'pass', '--measurement', db_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 SD Write Score"', '--result', 'pass', '--measurement', sd_write_score.getText(), '--units', default_unit])
-call(['lava-test-case', '"AnTuTu 2.8.2 SD Read Score"', '--result', 'pass', '--measurement', sd_read_score.getText(), '--units', default_unit])
+output_result("CPU_Integer_Score", cpu_int_score.getText())
+output_result("CPU_Float_Score", cpu_float_score.getText())
+output_result("2D_Score", twod_score.getText())
+output_result("3D_Score", threed_score.getText())
+output_result("Mem_Score", mem_score.getText())
+output_result("DB_Score", db_score.getText())
+output_result("SD_Write_Score", sd_write_score.getText().strip().split(' ').pop())
+output_result("SD_Read_Score", sd_read_score.getText().strip().split(' ').pop())
 
 total_score = int(cpu_int_score.getText().strip()) + int(cpu_float_score.getText().strip()) + int(twod_score.getText().strip())
 total_score = total_score + int(threed_score.getText().strip()) + int(mem_score.getText().strip()) + int(db_score.getText().strip())
 total_score = total_score + int(sd_write_score.getText().strip().split(' ').pop()) + int(sd_read_score.getText().strip().split(' ').pop())
-call(['lava-test-case', '"AnTuTu 2.8.2 Total Score"', '--result', 'pass', '--measurement', str(total_score), '--units', default_unit])
+output_result("total_score", str(total_score))

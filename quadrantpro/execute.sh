@@ -17,7 +17,7 @@ get_result(){
         line=$(echo $line|sed 's/\r//g')
         key=$(echo $line|cut -d, -f1)
         value=$(echo $line|cut -d\,  -f2)
-        output_test_result "${key}" "pass" "${value}" "points"
+        output_test_result "quadrandpro_${key}" "pass" "${value}" "points"
     done 
 }
 

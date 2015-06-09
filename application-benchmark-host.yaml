@@ -24,7 +24,7 @@ metadata:
 
 params:
     APP_CONFIG_LIST: ""
-    LOOP_COUNT: 12
+    LOOP_COUNT: 13
     COLLECT_STREAMLINE: "false"
 
 run:

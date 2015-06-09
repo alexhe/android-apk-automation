@@ -6,42 +6,84 @@ from subprocess import call
 
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
+
+parent_dir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % parent_dir
+
+
 default_unit = 'points'
 def get_score_with_content_desc(vc, content_desc, offset=1):
     score_view =  vc.findViewWithText(content_desc)
     score_uid = score_view.getUniqueId()
     uid = int(re.search("id/no_id/(?P<uid>\d+)", score_uid).group('uid'))
     score = vc.findViewByIdOrRaise("id/no_id/%s" % (uid + offset))
-    call(['lava-test-case', content_desc, '--result', 'pass', '--measurement', score.getText(), '--units', default_unit])
+    call([f_output_result, "GFXBench3_" + content_desc.replace(" ", "_"), 'pass', score.getText(), default_unit])
+
+
+def dump_always():
+    success = False
+    while not success:
+        try:
+            vc.dump()
+            success = True
+        except RuntimeError:
+            print("Got RuntimeError when call vc.dump()")
+            time.sleep(5)
+        except ValueError:
+            print("Got ValueError when call vc.dump()")
+            time.sleep(5)
+
 
 kwargs1 = {'verbose': False, 'ignoresecuredevice': False}
 device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
-time.sleep(2)
-vc.dump(window='-1')
 
 # Accept License
-btn_license = vc.findViewByIdOrRaise("android:id/button1")
-btn_license.touch()
-vc.dump(window='-1')
+time.sleep(2)
+dump_always()
+btn_license = vc.findViewById("android:id/button1")
+if btn_license:
+    btn_license.touch()
 
 # Accept Active Internet connection
-btn_accept = vc.findViewByIdOrRaise("android:id/button1")
-btn_accept.touch()
-time.sleep(15)
-vc.dump(window='-1')
+time.sleep(2)
+dump_always()
+btn_accept = vc.findViewById("android:id/button1")
+if btn_accept:
+    btn_accept.touch()
+
+server_connected = False
+while not server_connected:
+    try:
+        time.sleep(15)
+        dump_always()
+        alert_not_connected = vc.findViewWithText(u'GFXBench could not reach our servers. Please come back later.')
+        if alert_not_connected:
+            btn_retry = vc.findViewWithTextOrRaise(u'Retry')
+            btn_retry.touch()
+            continue
+        text_connecting = vc.findViewWithText(u'Connecting to server.')
+        if text_connecting:
+            continue
+        server_connected = True
+    except ViewNotFoundException:
+        pass
+
 
 # Accept Data Sync and Download content
-btn_accept_1 = vc.findViewByIdOrRaise("android:id/button1")
-btn_accept_1.touch()
+time.sleep(15)
+dump_always()
+btn_accept_1 = vc.findViewById("android:id/button1")
+if btn_accept_1:
+    btn_accept_1.touch()
 
 # Wait for download to finish
 finished = False
 while (not finished):
-    time.sleep(50)
     try:
-        vc.dump(window='-1')
+        time.sleep(50)
+        dump_always()
         vc.findViewByIdOrRaise("android:id/content")
     except ViewNotFoundException:
         finished = True
@@ -56,13 +98,13 @@ test.touch()
 # Wait while benchmark is running
 finished = False
 while (not finished):
-    time.sleep(50)
     try:
-        vc.dump(window='-1')
+        time.sleep(50)
+        dump_always()
         vc.findViewByIdOrRaise("com.glbenchmark.glbenchmark27:id/cell_result_maincolumn")
     except ViewNotFoundException:
         finished = True
-        pass
+        npass
     except RuntimeError as e:
         print e
 print "benchmark finished"

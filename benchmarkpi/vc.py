@@ -57,7 +57,7 @@ else:
     sys.exit(1)
 
 # Submit the test result to LAVA
-collect_score(benchmark_name, run_result, score_number, score_unit)
+collect_score("benchmarkpi_" + benchmark_name, run_result, score_number, score_unit)
 
 # Exit the app
 vc.dump(window='-1')

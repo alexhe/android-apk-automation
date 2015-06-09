@@ -40,6 +40,29 @@ f_min(){
     fi
 }
 
+standard_deviation_error(){
+    local average=$1
+    if [ -z "${average}" ]; then
+        return
+    fi
+    shift
+
+    local values=$1
+    if [ -z "${values}" ]; then
+        return
+    fi
+    shift
+    local deviations_sum=0
+    local count=0
+    for s_value in $values ; do
+        s_deviation=$(echo "${average},${s_value}"|awk -F, '{printf "%.2f",($2-$1)^2;}')
+        deviations_sum=$(echo "${deviations_sum},${s_deviation}"|awk -F, '{printf "%.2f",$1+$2;}')
+        count=$(echo "${count},1"|awk -F, '{printf $1+$2;}')
+    done
+    local deviation=$(echo "${deviations_sum},${count}"|awk -F, '{printf "%.2f",sqrt($1/$2);}')
+    local std_err=$(echo "${deviation},${count}"|awk -F, '{printf "%.2f",$1/sqrt($2);}')
+    echo "${deviation},${std_err}"
+}
 ## Description:
 ##   calculate the average value for specified csv file.
 ##   The first field of that csv file should be the key/name of that line,
@@ -60,12 +83,15 @@ statistic(){
     if [ -z "$field_no" ]; then
         field_no=2
     fi
+
+    local units_field_no=$3
+    local units=""
+
     local total=0
-    local max=0
-    local min=0
     local old_key=""
     local new_key=""
     local count=0
+    local values=""
     for line in $(cat "${f_data}"); do
         if ! echo "$line"|grep -q ,; then
             continue
@@ -73,32 +99,47 @@ statistic(){
         new_key=$(echo $line|cut -d, -f1)
         value=$(echo $line|cut -d, -f${field_no})
         if [ "X${new_key}" = "X${old_key}" ]; then
-            total=$(echo "scale=2; ${total}+${value}"|bc -s)
+            total=$(echo ${total},${value}|awk -F, '{printf "%.2f",$1+$2;}')
+            values="${values} ${value}"
             count=$(echo "$count + 1"|bc)
-            max=$(f_max "$max" "$value")
-            min=$(f_min "$min" "$value")
         else
             if [ "X${old_key}" != "X" ]; then
-                if [ $count -ge 4 ]; then
-                    average=$(echo "scale=2; ($total-$max-$min)/($count-2)"|bc)
+                local average=$(echo ${total},${count}|awk -F, '{printf "%.2f",$1/$2;}')
+                local sigma_stderr=$(standard_deviation_error "${average}" "${values}")
+                local sigma=$(echo ${sigma_stderr}|cut -d, -f1)
+                local std_err=$(echo ${sigma_stderr}|cut -d, -f2)
+                if [ -z "${units}" ]; then
+                    echo "${old_key}=${average}"
+                    echo "${old_key}_sigma=${sigma}"
+                    echo "${old_key}_std_err=${std_err}"
                 else
-                    average=$(echo "scale=2; $total/$count"|bc)
+                    echo "${old_key}=${average},${units}"
+                    echo "${old_key}_sigma=${sigma},${units}"
+                    echo "${old_key}_std_err=${std_err},${units}"
                 fi
-                echo "$old_key=$average"
             fi
             total="${value}"
-            max="${value}"
-            min="${value}"
+            values="${value}"
             old_key="${new_key}"
             count=1
+            if [ -n "${units_field_no}" ]; then
+                units=$(echo $line|cut -d, -f${units_field_no})
+            fi
         fi
     done
     if [ "X${new_key}" != "X" ]; then
-        if [ $count -ge 4 ]; then
-            average=$(echo "scale=2; ($total-$max-$min)/($count-2)"|bc)
+        local average=$(echo ${total},${count}|awk -F, '{printf "%.2f",$1/$2;}')
+        local sigma_stderr=$(standard_deviation_error "${average}" "${values}")
+        local sigma=$(echo ${sigma_stderr}|cut -d, -f1)
+        local std_err=$(echo ${sigma_stderr}|cut -d, -f2)
+        if [ -z "${units}" ]; then
+            echo "${old_key}=${average}"
+            echo "${old_key}_sigma=${sigma}"
+            echo "${old_key}_std_err=${std_err}"
         else
-            average=$(echo "scale=2; $total/$count"|bc)
+            echo "${old_key}=${average},${units}"
+            echo "${old_key}_sigma=${sigma},${units}"
+            echo "${old_key}_std_err=${std_err},${units}"
         fi
-        echo "$new_key=$average"
     fi
 }

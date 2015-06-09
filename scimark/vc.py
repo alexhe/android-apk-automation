@@ -14,8 +14,21 @@ device, serialno = ViewClient.connectToDeviceOrExit(**kwargs1)
 kwargs2 = {'startviewserver': True, 'forceviewserveruse': False, 'autodump': False, 'ignoreuiautomatorkilled': True, 'compresseddump': False}
 vc = ViewClient(device, serialno, **kwargs2)
 
+def dump_always():
+    success = False
+    while not success:
+        try:
+            vc.dump()
+            success = True
+        except RuntimeError:
+            print("Got RuntimeError when call vc.dump()")
+            time.sleep(5)
+        except ValueError:
+            print("Got ValueError when call vc.dump()")
+            time.sleep(5)
+
 time.sleep(5)
-vc.dump()
+dump_always()
 btn_java_bench = vc.findViewWithTextOrRaise(u'Java bench')
 btn_java_bench.touch()
 
@@ -25,18 +38,18 @@ finished = False
 while(not finished):
     try:
         time.sleep(60)
-        vc.dump()
+        dump_always()
         results = vc.findViewByIdOrRaise("net.danielroggen.scimark:id/textViewResult")
         if results.getText().find("Done") > 0:
             finished = True
             print "benchmark finished"
-            for line in results.getText().split("\n"):
+            for line in results.getText().replace(": \n", ":").split("\n"):
                 line = str(line.strip())
                 key_val = line.split(":")
                 if len(key_val) == 2:
                     if key_val[0].strip() in keys:
                         key = key_val[0].strip().replace(' ', '_').replace('(', '').replace(')', '').replace(',', '')
-                        call([f_output_result, key, 'pass', key_val[1].strip(), 'Mflops'])
+                        call([f_output_result, "scimark_" + key, 'pass', key_val[1].strip(), 'Mflops'])
     except ViewNotFoundException:
         pass
     except RuntimeError:

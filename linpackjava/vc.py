@@ -30,8 +30,8 @@ while(not finished):
             finished = True
             print "benchmark finished"
             speed = res_match.group('measurement').strip()
-            print "%s=%s MFLOPS" % ("LinpackJavaSpeed", speed)
-            call([f_output_result, "LinpackJavaSpeed", 'pass', speed, 'MFLOPS'])
+            print "%s=%s MFLOPS" % ("LinpackJava_Speed", speed)
+            call([f_output_result, "LinpackJava_Speed", 'pass', speed, 'MFLOPS'])
     except ViewNotFoundException:
         pass
     except RuntimeError:

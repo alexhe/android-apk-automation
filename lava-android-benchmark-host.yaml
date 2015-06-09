@@ -25,7 +25,12 @@ install:
 
 params:
     TEST_NAME: "geekbench"
-    ITERATIONS: 1
+    APP_CONFIG_LIST: ""
+    LOOP_COUNT: 13
+    COLLECT_STREAMLINE: "false"
+    RECORD_CSV: "TRUE"
+    RECORD_STATISTICS: "TRUE"
+    VERBOSE_OUTPUT: "FALSE"
 
 run:
     steps:
@@ -37,6 +42,5 @@ run:
         - adb connect $IPADDR
         - adb wait-for-device
         - adb shell id
-        - cd $TEST_NAME
-        - for (( LOOP=1; LOOP<=$ITERATIONS; LOOP++ )); do lava-test-case $TEST_NAME-execution-$LOOP --shell ./execute.sh --serial $IPADDR:5555; done;
+        - ./$TEST_NAME/execute.sh --serial $IPADDR:5555 --loop-count "$LOOP_COUNT" --streamline "$COLLECT_STREAMLINE" --verbose-output $VERBOSE_OUTPUT --record-statistics $RECORD_STATISTICS --record-csv $RECORD_CSV
         - lava-sync $TEST_NAME-finished

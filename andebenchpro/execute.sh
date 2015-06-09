@@ -45,9 +45,9 @@ function get_result(){
             result="pass"
         fi
         if [ "X${result}" = "Xpass" ]; then
-            output_test_result "${key}" "pass" "${value}" "${units}"
+            output_test_result "andebenchpro_${key}" "pass" "${value}" "${units}"
         else
-            output_test_result "${key}" "fail"
+            output_test_result "andebenchpro_${key}" "fail"
         fi
     done
 }

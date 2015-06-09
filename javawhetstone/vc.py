@@ -52,7 +52,7 @@ while(not finished):
                     value = elements[2]
                 else:
                     continue
-                call([f_output_result, key, 'pass', value, units])
+                call([f_output_result, "javawhetstone_" + key, 'pass', value, units])
     except ViewNotFoundException:
         pass
     except RuntimeError:

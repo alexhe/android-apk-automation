@@ -9,9 +9,11 @@ from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient
 
 curdir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % curdir
+
 
 def collect_score(benchmark_name, run_result, score_number, score_unit):
-    call(['lava-test-case', benchmark_name, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
+    call([f_output_result, "glbenchmark251_" + benchmark_name, run_result, str(score_number), score_unit])
 
 def getText(node):
     children = node.childNodes

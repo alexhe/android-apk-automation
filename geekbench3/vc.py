@@ -6,12 +6,16 @@ from subprocess import call
 from com.dtmilano.android.viewclient import ViewClient, ViewNotFoundException
 
 curdir = os.path.realpath(os.path.dirname(__file__))
+f_output_result="%s/../common/output-test-result.sh"  % curdir
+
 
 def collect_score(testcase, run_result):
-    call(['lava-test-case', testcase, '--result', run_result])
+    call([f_output_result, "geekbench3_" + testcase, run_result])
+
 
 def collect_score_with_measurement(testcase, run_result, score_number, score_unit):
-    call(['lava-test-case', testcase, '--result', run_result, '--measurement', str(score_number), '--units', score_unit])
+    call([f_output_result, "geekbench3_" + testcase, run_result, str(score_number), score_unit])
+
 
 def all_fail():
     print testcase_run + " FAILED!"
