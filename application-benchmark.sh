@@ -6,7 +6,7 @@ source ${local_this_parent_dir}/common/common2.sh
 source ${local_this_parent_dir}/common/statistic_average.sh
 
 ## override default value in common2.sh
-G_LOOP_COUNT=12
+G_LOOP_COUNT=13
 BASE_URL="http://testdata.validation.linaro.org/apks/JavaBenchmark/pure-java-applications"
 #BASE_URL="scp://testdata//home/testdata.validation.linaro.org/apks/JavaBenchmark/pure-java-applications"
 APPS="NULL,com.android.browser/.BrowserActivity,Browser"
@@ -31,6 +31,7 @@ f_stat="${dir_rawdata}/activity_stat.raw"
 f_procmem="${dir_rawdata}/activity_procmem.raw"
 f_maps="${dir_rawdata}/activity_maps.raw"
 f_dumpsys_mem="${dir_rawdata}/activity_dumpsys_meminfo.raw"
+f_proc_meminfo="${dir_rawdata}/activity_proc_meminfo.raw"
 f_smaps="${dir_rawdata}/activity_smaps.raw"
 
 f_res_starttime="${dir_rawdata}/activity_starttime.csv"
@@ -64,6 +65,10 @@ collect_mem_raw_data(){
     echo "===package=${loop_app_package}, count=${loop_count} start" >> "${f_dumpsys_mem}"
     adb shell su 0 dumpsys meminfo "${loop_app_package}" >> "${f_dumpsys_mem}"
     echo "===package=${loop_app_package}, count=${loop_count} end" >> "${f_dumpsys_mem}"
+
+    echo "===package=${loop_app_package}, count=${loop_count} start" >> "${f_proc_meminfo}"
+    adb shell cat /proc/meminfo >> "${f_proc_meminfo}"
+    echo "===package=${loop_app_package}, count=${loop_count} end" >> "${f_proc_meminfo}"
 
     local pid=$(adb shell ps|grep ${loop_app_package}|awk '{print $2}')
     if [ -n "${pid}" ]; then
@@ -247,14 +252,49 @@ format_dumpsys_meminfo(){
     fi
 }
 
+format_proc_meminfo(){
+    if [ ! -f "${f_proc_meminfo}" ]; then
+        return
+    fi
+    local package=""
+    local memTotal=""
+    local memTotalFree=""
+    #===package=com.android.browser, count=0 start
+    #MemTotal:        1879840 kB
+    #MemFree:          758012 kB
+    for line in $(grep -e " start" -e "^MemTotal" -e "^MemFree" ${f_proc_meminfo}|tr ':=' ','|tr ' ' ','|tr -s ','|sed 's/^,//') ; do
+        case "X${line}" in
+            "Xpackage"*)
+                if [ -n "${package}" ] && [ -n "${memTotalFree}" ] && [ -n "${memTotal}" ] ; then
+                    echo "${package},${memTotal},${memTotalFree}" >>"${f_proc_meminfo}.csv"
+                fi
+                package=$(echo "${line}"|cut -d\, -f2)
+                ;;
+            "XMemTotal"*)
+                memTotal=$(echo "${line}"|cut -d\, -f2)
+                ;;
+            "XMemFree"*)
+                memTotalFree=$(echo "${line}"|cut -d\, -f2)
+                ;;
+            "X"*)
+                continue
+                ;;
+        esac
+    done
+    if [ -n "${package}" ] && [ -n "${memTotalFree}" ] && [ -n "${memTotal}" ] ; then
+        echo "${package},${memTotal},${memTotalFree}" >>"${f_proc_meminfo}.csv"
+    fi
+}
+
 format_raw_data(){
-    rm -fr ${f_res_starttime} ${f_res_mem} ${f_res_cpu} ${f_res_procrank} ${f_res_dumpsys_mem}
+    rm -fr ${f_res_starttime} ${f_res_mem} ${f_res_cpu} ${f_res_procrank} ${f_res_dumpsys_mem} "${f_proc_meminfo}.csv"
 
     format_starttime_raw_data
     format_mem_raw_data
     format_cpu_raw_data
     format_procrank_data
     format_dumpsys_meminfo
+    format_proc_meminfo
 }
 
 set_browser_homepage(){
@@ -295,35 +335,44 @@ func_prepare_app_bench(){
     rm -fr "${f_starttime}" "${f_mem}" "${f_cpu}" "${f_procrank}" "${f_stat}" "${f_procmem}" "${f_procmem}_m" "${f_procmem}_p"
 }
 
+statistic_data_sort_wrapper(){
+    local f_data="$1"
+    local field_no="$2"
+    sort "${f_data}" >"${f_data}.sort"
+    statistic "${f_data}.sort" "${field_no}"
+}
+
 statistic_data(){
     rm -fr "${f_result}"
-    statistic "$f_res_starttime" 2|sed "s/^/starttime_/"|sed "s/$/ ms/"| tee -a "${f_result}"
+    statistic_data_sort_wrapper "$f_res_starttime" 2|sed "s/^/starttime_/"|sed "s/$/ ms/"| tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_mem}" 2|sed "s/^/ps_vss_/" |sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_mem}" 2|sed "s/^/ps_vss_/" |sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_mem}" 3|sed "s/^/ps_rss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_mem}" 3|sed "s/^/ps_rss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_procrank}" 2|sed "s/^/procrank_vss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_procrank}" 2|sed "s/^/procrank_vss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_procrank}" 3|sed "s/^/procrank_rss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_procrank}" 4|sed "s/^/procrank_pss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_procrank}" 4|sed "s/^/procrank_pss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_procrank}" 5|sed "s/^/procrank_uss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_procrank}" 5|sed "s/^/procrank_uss_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_dumpsys_mem}" 2|sed "s/^/dumpsys_meminfo_pss_native_heap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_dumpsys_mem}" 2|sed "s/^/dumpsys_meminfo_pss_native_heap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_dumpsys_mem}" 3|sed "s/^/dumpsys_meminfo_pss_dalvik_heap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_dumpsys_mem}" 3|sed "s/^/dumpsys_meminfo_pss_dalvik_heap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_dumpsys_mem}" 4|sed "s/^/dumpsys_meminfo_pss_sommap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_dumpsys_mem}" 4|sed "s/^/dumpsys_meminfo_pss_sommap_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_dumpsys_mem}" 5|sed "s/^/dumpsys_meminfo_pss_total_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_dumpsys_mem}" 5|sed "s/^/dumpsys_meminfo_pss_total_/"|sed "s/$/ KB/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_proc_meminfo}.csv" 2|sed "s/^/MemoryTotal_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_cpu}_2nd" 2|sed "s/^/cpu_user_/"|sed "s/$/ %/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_proc_meminfo}.csv" 3|sed "s/^/MemoryTotalFree_/"|sed "s/$/ KB/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_cpu}_2nd" 3|sed "s/^/cpu_sys_/"|sed "s/$/ %/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_cpu}_2nd" 2|sed "s/^/cpu_user_/"|sed "s/$/ %/"|tee -a "${f_result}"
     echo "--------------------------------"
-    statistic "${f_res_cpu}_2nd" 4|sed "s/^/cpu_idle_/"|sed "s/$/ %/"|tee -a "${f_result}"
+    statistic_data_sort_wrapper "${f_res_cpu}_2nd" 3|sed "s/^/cpu_sys_/"|sed "s/$/ %/"|tee -a "${f_result}"
+    echo "--------------------------------"
+    statistic_data_sort_wrapper "${f_res_cpu}_2nd" 4|sed "s/^/cpu_idle_/"|sed "s/$/ %/"|tee -a "${f_result}"
     sed -i 's/=/,/' "${f_result}"
 }
 

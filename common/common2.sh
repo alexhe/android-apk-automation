@@ -328,7 +328,7 @@ func_loop_apps_for_times(){
             fi
 
             # start activity
-            adb shell am start -W -S ${loop_app_start_activity}
+            timeout 1m adb shell am start -W -S ${loop_app_start_activity}
 
             # run test steps after started the activity
             if [ -n "${var_func_run_test}" ]; then
